@@ -1,7 +1,7 @@
 # Vídeo demo · 3 minutos
 
-Guion para grabar hoy. **≈350 palabras de voz** ≈ 2:25 a ritmo normal; con las pausas y
-las transiciones de pantalla llega a **2:55–3:00**. Grábalo en **6 tomas separadas** y
+Guion para grabar hoy. **332 palabras de voz** ≈ 2:20 a ritmo normal (medido); con las
+pausas y las transiciones de pantalla llega a **2:55–3:00**. Grábalo en **6 tomas separadas** y
 únelas: es mucho más rápido que buscar la toma perfecta.
 
 ## Antes de grabar (10 min)
