@@ -84,6 +84,17 @@ y lo dice en pantalla en lugar de rellenar los huecos.
 | Llama fría | 50,1 % | 23,4 °C | 60 ppm | PRE-IGNICIÓN, humo 0,21 %/m |
 | Artemis + corte a 220 s | — | 25,3 °C | 33 ppm | CO 192 → 33 ppm, radiación 4,51 → 3,60 kW/m² |
 
+## Tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+23 comprobaciones en unos 4 s, sin dependencias nuevas: magnitudes de los cuatro
+escenarios, la ventaja de +323 s, el corte de ventilación, las conversiones del mapeador,
+el rechazo de datasets incompletos y las cifras exactas que se dicen en la demo. Si un
+cambio mueve un número del guion, la suite falla.
+
 ## Estructura
 
 ```
@@ -92,6 +103,7 @@ physics_simulator.py   Modelo físico: escenarios, atmósferas, corte de ventila
 anomaly_engine.py      Mapeo de CSV con unidades, IsolationForest, MIRI, protocolo
 iss_live.py            Cliente TLCP propio + buffer de muestras reales
 demo_saffire_sintetico.csv   Dataset de demostración (sintético, unidades crudas)
+tests/test_pyroguard.py     Regresión de las cifras del guion y de los escenarios
 GUION_DEMO.md          Guion de presentación de 5 minutos
 docs/                  Documentación técnica
 ```
