@@ -130,6 +130,7 @@ docs/                  Documentación: persona, diseño, arquitectura, física, 
 
 ## Documentación
 
+- [Checklist de entrega](ENTREGA.md) — enlaces, texto listo para el formulario y plan B
 - [Persona y caso de uso](docs/PERSONA.md) — quién usa la app y qué decide
 - [Decisiones de diseño](docs/DISENO.md) — tres ideas, qué se descartó, checklist UX y wireframe de las tres pantallas
 - [Arquitectura y flujo de datos](docs/ARQUITECTURA.md)
