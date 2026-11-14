@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*.log
+.tools/
+.streamlit/secrets.toml
+ui-*.png
+.venv/
+.env
