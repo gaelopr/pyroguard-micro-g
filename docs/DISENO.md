@@ -40,6 +40,13 @@ El jurado puede abrir el enlace en un teléfono, así que la versión pequeña m
 esencial: veredicto, dos gráficas y cuatro indicadores. La barra lateral se colapsa sola
 y las figuras bajaron de 700 a 470 px de alto.
 
+## Wireframe
+
+![Wireframe de las tres pantallas](img/wireframe.png)
+
+Versión anotada y navegable: [`wireframe.html`](wireframe.html) — se abre en cualquier
+navegador, sin dependencias ni conexión.
+
 ## Qué probaríamos con usuarios (pendiente)
 
 Cinco tareas con tres personas ajenas al proyecto, midiendo tiempo y errores:

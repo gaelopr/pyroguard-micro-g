@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>PyroGuard Micro-G · Wireframe</title>
+<style>
+  :root{
+    --ink:#1f2933; --mid:#52606d; --soft:#9aa5b1; --line:#cbd2d9;
+    --fill:#eef1f4; --fill2:#e2e7ec; --accent:#c8e6f5; --warn:#f5e6c8; --bad:#f2d0cc;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:34px 30px 40px;background:#fff;color:var(--ink);
+       font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  h1{font-size:19px;margin:0 0 4px;letter-spacing:-.01em}
+  .sub{font-size:11.5px;color:var(--mid);margin:0 0 26px}
+  .row{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+  .col{width:390px;flex:0 0 390px}
+  .phone{border:2px solid var(--ink);border-radius:26px;padding:9px;background:#fff;height:690px}
+  .screen{border:1px solid var(--line);border-radius:18px;height:100%;padding:12px 12px 10px;
+          display:flex;flex-direction:column;gap:8px;overflow:hidden;background:#fcfcfd}
+  .bar{display:flex;justify-content:space-between;font-size:8px;color:var(--soft);letter-spacing:.06em}
+  .h{font-size:12.5px;font-weight:700;letter-spacing:.02em}
+  .h small{display:block;font-weight:400;font-size:8px;color:var(--soft);letter-spacing:.13em;margin-top:2px}
+  .box{border:1px dashed var(--line);background:var(--fill);border-radius:6px}
+  .solid{border:1px solid var(--line);background:#fff;border-radius:6px}
+  .lbl{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
+  .val{font-size:16px;font-weight:700;line-height:1.1}
+  .verdict{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);
+           border-left:3px solid var(--accent);border-radius:6px;padding:9px 10px}
+  .verdict .m{display:flex;flex-direction:column;gap:2px;min-width:58px}
+  .verdict .d{font-size:7.5px;color:var(--mid);line-height:1.45;flex:1}
+  .chips{display:flex;gap:5px}
+  .chip{flex:1;border:1px solid var(--line);border-radius:5px;padding:5px 6px;background:#fff}
+  .chip .lbl{font-size:7px}
+  .chip .v{font-size:11px;font-weight:700}
+  .tabs{display:flex;gap:14px;border-bottom:1px solid var(--line);padding-bottom:5px;margin-top:2px}
+  .tab{font-size:9px;letter-spacing:.09em;color:var(--soft);text-transform:uppercase}
+  .tab.on{color:var(--ink);font-weight:700;border-bottom:2px solid var(--ink);padding-bottom:4px}
+  .chart{border:1px solid var(--line);border-radius:6px;background:
+      repeating-linear-gradient(0deg,#fff,#fff 23px,var(--fill) 23px,var(--fill) 24px);position:relative}
+  .chart .cap{position:absolute;top:6px;left:0;right:0;text-align:center;font-size:7.5px;color:var(--mid)}
+  .wave{position:absolute;left:8%;right:8%;bottom:18%;height:38%;border-top:2px solid var(--ink);
+        border-radius:50% 50% 0 0/100% 100% 0 0;transform:skewX(-3deg)}
+  .metrics{display:flex;gap:8px}
+  .metrics > div{flex:1}
+  .exp{border:1px solid var(--line);border-radius:5px;padding:6px 8px;font-size:8px;color:var(--mid);background:#fff}
+  .action{display:flex;gap:8px;align-items:flex-start;background:#fff;border:1px solid var(--line);
+          border-left:2px solid var(--soft);border-radius:5px;padding:6px 8px}
+  .action b{font-size:8.5px;display:block}
+  .action span{font-size:7.5px;color:var(--mid);line-height:1.4}
+  .n{width:13px;height:13px;border-radius:50%;background:var(--ink);color:#fff;font-size:7.5px;
+     display:flex;align-items:center;justify-content:center;flex:0 0 13px;margin-top:1px}
+  .cap2{font-size:10.5px;font-weight:700;margin:10px 0 4px}
+  .legend{font-size:9px;color:var(--mid);line-height:1.55;margin:0;padding-left:0;list-style:none}
+  .legend li{margin-bottom:3px;display:flex;gap:6px}
+  .legend b{color:var(--ink)}
+  .foot{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;font-size:9.5px;color:var(--mid)}
+  .gauge{width:74px;height:44px;border:2px solid var(--line);border-bottom:0;border-radius:40px 40px 0 0;margin:0 auto}
+</style>
+</head>
+<body>
+  <h1>PyroGuard Micro-G · Wireframe de las tres pantallas</h1>
+  <p class="sub">Baja fidelidad · una acción principal por pantalla · 390 × 844 px (móvil)</p>
+
+  <div class="row">
+    <!-- PANTALLA 1 -->
+    <div class="col">
+      <div class="phone"><div class="screen">
+        <div class="bar"><span>PYROGUARD MICRO-G</span><span>SIMULADOR</span></div>
+        <div class="h">Veredicto<small>LO PRIMERO QUE SE LEE</small></div>
+
+        <div class="verdict">
+          <div class="m"><span class="lbl">MIRI</span><span class="val">66 %</span></div>
+          <div class="m"><span class="lbl">Nivel</span><span class="val">CRÍTICO</span></div>
+          <div class="m"><span class="lbl">Ventaja</span><span class="val">+72 s</span></div>
+          <div class="d">Convección forzada · CO 175 ppm · radiación 2,65 kW/m²</div>
+        </div>
+
+        <div>
+          <div class="lbl">Cursor temporal</div>
+          <div style="height:10px;position:relative;margin-top:6px">
+            <div style="position:absolute;top:4px;left:0;right:0;height:2px;background:var(--line)"></div>
+            <div style="position:absolute;top:0;left:12%;width:12px;height:12px;border-radius:50%;background:var(--ink)"></div>
+          </div>
+        </div>
+        <div class="chips">
+          <div class="chip"><span class="lbl">temp</span><div class="v">49,9 °C</div></div>
+          <div class="chip"><span class="lbl">CO</span><div class="v">175 ppm</div></div>
+          <div class="chip"><span class="lbl">MIRI</span><div class="v">66 %</div></div>
+          <div class="chip"><span class="lbl">IA</span><div class="v">alerta</div></div>
+        </div>
+        <div class="tabs"><span class="tab on">Estado</span><span class="tab">Detección</span><span class="tab">Respuesta</span></div>
+
+        <div class="chart" style="height:118px"><span class="cap">Temperatura de rack vs ventilación</span><span class="wave"></span></div>
+        <div class="chart" style="height:104px"><span class="cap">Firma química: CO · HCN · CO2</span><span class="wave" style="bottom:26%;height:26%"></span></div>
+
+        <div class="metrics">
+          <div class="solid" style="padding:5px"><span class="lbl">Radiación</span><div class="v" style="font-size:11px">2,65 kW/m²</div></div>
+          <div class="solid" style="padding:5px"><span class="lbl">Humo</span><div class="v" style="font-size:11px">0,00 %/m</div></div>
+          <div class="solid" style="padding:5px"><span class="lbl">O2 mín</span><div class="v" style="font-size:11px">19,7 %</div></div>
+        </div>
+        <div class="exp">▸ Datos y exportación</div>
+      </div></div>
+
+      <p class="cap2">1 · ESTADO</p>
+      <ul class="legend">
+        <li><span class="n">1</span><span><b>Veredicto único:</b> riesgo, nivel y ventaja antes que cualquier gráfica.</span></li>
+        <li><span class="n">2</span><span><b>Cursor:</b> un control, mueve todas las cifras a la vez.</span></li>
+        <li><span class="n">3</span><span><b>Dos gráficas</b> y tres cifras: la evidencia mínima para creer el veredicto.</span></li>
+        <li><span class="n">4</span><span><b>Tabla y descarga</b> plegadas: no compiten con la decisión.</span></li>
+      </ul>
+    </div>
+
+    <!-- PANTALLA 2 -->
+    <div class="col">
+      <div class="phone"><div class="screen">
+        <div class="bar"><span>PYROGUARD MICRO-G</span><span>SIMULADOR</span></div>
+        <div class="h">Detección<small>CUÁNDO SE ENTERÓ CADA MOTOR</small></div>
+        <div class="verdict" style="border-left-color:var(--line)">
+          <div class="m"><span class="lbl">MIRI</span><span class="val">66 %</span></div>
+          <div class="m"><span class="lbl">Nivel</span><span class="val">CRÍTICO</span></div>
+          <div class="m"><span class="lbl">Ventaja</span><span class="val">+72 s</span></div>
+          <div class="d">Convección forzada · CO 175 ppm · radiación 2,65 kW/m²</div>
+        </div>
+        <div class="chips">
+          <div class="chip"><span class="lbl">temp</span><div class="v">49,9 °C</div></div>
+          <div class="chip"><span class="lbl">CO</span><div class="v">175 ppm</div></div>
+          <div class="chip"><span class="lbl">MIRI</span><div class="v">66 %</div></div>
+          <div class="chip"><span class="lbl">IA</span><div class="v">alerta</div></div>
+        </div>
+        <div class="tabs"><span class="tab">Estado</span><span class="tab on">Detección</span><span class="tab">Respuesta</span></div>
+
+        <div style="display:flex;gap:8px">
+          <div style="flex:2">
+            <div class="chart" style="height:96px"><span class="cap">IsolationForest · anomaly_score</span><span class="wave" style="height:22%"></span></div>
+            <div class="chart" style="height:96px;margin-top:7px"><span class="cap">MIRI · umbral 35 %</span>
+              <span class="wave" style="bottom:14%;height:46%"></span>
+              <div style="position:absolute;left:0;right:0;bottom:52%;border-top:1px dashed var(--mid)"></div>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+            <div class="solid" style="padding:6px;flex:1"><span class="lbl">MIRI ahora</span>
+              <div class="gauge"></div><div class="val" style="font-size:11px;text-align:center">66 %</div></div>
+            <div class="solid" style="padding:6px;flex:1;font-size:7.5px;line-height:1.5;color:var(--mid)">
+              <span class="lbl">Benchmark</span><br>IA: <b>111 s</b><br>Clásico: <b>183 s</b><br><b>+72 s</b>
+            </div>
+          </div>
+        </div>
+        <div class="box" style="flex:1;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--mid);text-align:center;padding:8px">
+          Zona sombreada = régimen posterior a la primera alerta IA
+        </div>
+      </div></div>
+
+      <p class="cap2">2 · DETECCIÓN</p>
+      <ul class="legend">
+        <li><span class="n">5</span><span><b>Las dos líneas, una al lado de la otra:</b> el argumento del proyecto en un vistazo.</span></li>
+        <li><span class="n">6</span><span><b>Benchmark en cifras</b> junto a la aguja: no hay que leer el gráfico para entenderlo.</span></li>
+        <li><span class="n">7</span><span><b>Mismo veredicto arriba</b> en todas las pestañas: nunca se pierde el contexto.</span></li>
+      </ul>
+    </div>
+
+    <!-- PANTALLA 3 -->
+    <div class="col">
+      <div class="phone"><div class="screen">
+        <div class="bar"><span>PYROGUARD MICRO-G</span><span>SIMULADOR</span></div>
+        <div class="h">Respuesta<small>QUÉ HACER, EN ORDEN</small></div>
+        <div class="verdict" style="border-left-color:var(--bad)">
+          <div class="m"><span class="lbl">MIRI</span><span class="val">66 %</span></div>
+          <div class="m"><span class="lbl">Nivel</span><span class="val">CRÍTICO</span></div>
+          <div class="m"><span class="lbl">T. crítico</span><span class="val">477 s</span></div>
+        </div>
+        <div class="chips">
+          <div class="chip"><span class="lbl">temp</span><div class="v">49,9 °C</div></div>
+          <div class="chip"><span class="lbl">CO</span><div class="v">175 ppm</div></div>
+          <div class="chip"><span class="lbl">MIRI</span><div class="v">66 %</div></div>
+          <div class="chip"><span class="lbl">IA</span><div class="v">alerta</div></div>
+        </div>
+        <div class="tabs"><span class="tab">Estado</span><span class="tab">Detección</span><span class="tab on">Respuesta</span></div>
+
+        <div class="action" style="border-left-color:var(--ink)"><span class="n">1</span><div><b>Cortar la ventilación del rack</b><span>Apagar ventiladores y cerrar compuertas. Sin convección forzada, la llama se sofoca.</span></div></div>
+        <div class="action"><span class="n">2</span><div><b>Aislar eléctricamente</b><span>Desenergizar las barras RPCM y verificar ausencia de arco.</span></div></div>
+        <div class="action"><span class="n">3</span><div><b>Proteger a la tripulación</b><span>Máscaras PBA si CO &gt; 50 ppm o HCN &gt; 5 ppm.</span></div></div>
+        <div class="action"><span class="n">4</span><div><b>Suprimir con CO2</b><span>Descargar el extintor por el puerto, sin abrir la puerta.</span></div></div>
+        <div class="action"><span class="n">5</span><div><b>Verificar antes de reingresar</b><span>CSA-CP y depuradores CDRA antes de autorizar el acceso.</span></div></div>
+
+        <div class="solid" style="padding:7px;flex:1">
+          <span class="lbl">Análisis</span>
+          <div style="font-size:7.5px;color:var(--mid);line-height:1.5;margin-top:3px">
+            CO/CO2 = 1,43 % → combustión incompleta. HCN 3,6 ppm confirma degradación de
+            aislamientos. Radiación 2,65 kW/m² con ΔT moderado: llama con emisión IR dominante.
+          </div>
+        </div>
+      </div></div>
+
+      <p class="cap2">3 · RESPUESTA</p>
+      <ul class="legend">
+        <li><span class="n">8</span><span><b>Acción nº 1 destacada</b> visualmente: siempre hay una primera cosa que hacer.</span></li>
+        <li><span class="n">9</span><span><b>Cinco pasos, no un párrafo:</b> cada uno con su motivo en una línea.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>Recorrido:</b> abrir → veredicto (riesgo + nivel) → evidencia → acción nº 1. Objetivo: menos de 10 s.
+    &nbsp;·&nbsp; <b>Fuera del wireframe:</b> barra lateral de modo (simulador / LIVE / CSV) y pestaña de datos, que se
+    abren solo cuando se necesitan.
+  </div>
+</body>
+</html>

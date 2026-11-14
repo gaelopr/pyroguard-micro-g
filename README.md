@@ -131,7 +131,7 @@ docs/                  Documentación: persona, diseño, arquitectura, física, 
 ## Documentación
 
 - [Persona y caso de uso](docs/PERSONA.md) — quién usa la app y qué decide
-- [Decisiones de diseño](docs/DISENO.md) — tres ideas, qué se descartó y checklist UX
+- [Decisiones de diseño](docs/DISENO.md) — tres ideas, qué se descartó, checklist UX y wireframe de las tres pantallas
 - [Arquitectura y flujo de datos](docs/ARQUITECTURA.md)
 - [Modelo físico](docs/MODELO_FISICO.md)
 - [Motor de detección: IsolationForest y MIRI](docs/MOTOR_IA.md)
