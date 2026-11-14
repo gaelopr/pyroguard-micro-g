@@ -11,7 +11,8 @@ import anomaly_engine as ae
 import iss_live
 import physics_simulator as ps
 
-st.set_page_config(layout="wide", page_title="PyroGuard Micro-G | NASA Fire Safety", page_icon="🛰️")
+st.set_page_config(layout="wide", page_title="PyroGuard Micro-G | NASA Fire Safety", page_icon="🛰️",
+                   initial_sidebar_state="expanded")
 
 RED, ORANGE, CYAN, GREEN, YELLOW, VIOLET = "#FF3B30", "#FF6B35", "#00E5FF", "#39FF88", "#FFD166", "#B47CFF"
 PCFG = {"displaylogo": False,
@@ -21,10 +22,17 @@ PCFG = {"displaylogo": False,
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap');
-.stApp { background: radial-gradient(circle at 18% -10%, #0d1b2a 0%, #060a10 55%, #04070b 100%); }
+.stApp { background-color:#04070b;
+  background-image:
+    radial-gradient(900px 420px at 14% -8%, rgba(0,229,255,.10), transparent 62%),
+    radial-gradient(720px 380px at 88% -2%, rgba(255,107,53,.075), transparent 62%),
+    linear-gradient(rgba(255,255,255,.020) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.020) 1px, transparent 1px);
+  background-size: auto, auto, 46px 46px, 46px 46px;
+  background-attachment: fixed; }
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: #C9D6E5; }
 h1, h2, h3, h4 { font-family: 'Share Tech Mono', monospace !important; letter-spacing: .05em; }
-.block-container { padding-top: 1.5rem; padding-bottom: 2rem; }
+.block-container { padding-top: 3.2rem; padding-bottom: 2.4rem; max-width: 1320px; }
 .pg-header { display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;
   border:1px solid rgba(0,229,255,.18); border-radius:12px; padding:14px 18px;
   background: linear-gradient(90deg, rgba(0,229,255,.07), rgba(6,10,16,.45) 58%, rgba(255,107,53,.06)); }
@@ -55,12 +63,55 @@ div[data-testid="stWidgetLabel"] p { font-family:'Share Tech Mono',monospace; fo
   font-size:13px; color:#C9D6E5; line-height:1.45; }
 .pg-note { font-family:'Share Tech Mono',monospace; font-size:9.5px; letter-spacing:.14em; color:#3E5A73;
   text-align:center; margin-top:16px; }
-.pg-verdict { display:flex; gap:26px; align-items:center; flex-wrap:wrap; margin:2px 0 12px 0;
-  border:1px solid rgba(128,170,210,.18); border-left:3px solid #00E5FF; border-radius:10px;
-  padding:13px 18px; background:rgba(10,18,28,.66); }
-.pg-verdict-m { display:flex; flex-direction:column; gap:3px; min-width:96px; }
-.pg-verdict-v { font-family:'Share Tech Mono',monospace; font-size:23px; color:#EAF4FF; line-height:1.05; }
-.pg-verdict-d { flex:1 1 240px; font-size:12px; color:#8FA9C2; line-height:1.55; }
+/* ---------- veredicto: tarjeta principal con anillo ---------- */
+.pg-hero { display:grid; grid-template-columns:132px 1fr; gap:24px; align-items:center;
+  margin:4px 0 14px; border:1px solid rgba(128,170,210,.18); border-radius:16px;
+  padding:16px 20px; background:linear-gradient(135deg, rgba(13,27,42,.88), rgba(8,14,24,.74));
+  box-shadow:0 24px 50px -34px #000, inset 0 1px 0 rgba(255,255,255,.05); }
+.pg-ring { position:relative; width:124px; height:124px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; }
+.pg-ring svg { position:absolute; inset:0; transform:rotate(-90deg); }
+.pg-ring-bg { fill:none; stroke:rgba(255,255,255,.07); stroke-width:9; }
+.pg-ring-fg { fill:none; stroke-width:9; stroke-linecap:round; transition:stroke-dashoffset .7s ease; }
+.pg-ring-v { font-family:'Share Tech Mono',monospace; font-size:25px; color:#EAF4FF; line-height:1;
+  display:flex; align-items:baseline; gap:1px; }
+.pg-ring-l { display:block; margin-top:5px; font-family:'Share Tech Mono',monospace; font-size:7.5px;
+  letter-spacing:.18em; color:#5E7A96; text-transform:uppercase; }
+.pg-hero-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.pg-pill { font-family:'Share Tech Mono',monospace; font-size:10.5px; letter-spacing:.15em;
+  padding:4px 11px; border-radius:999px; border:1px solid currentColor; }
+.pg-hero-sub { font-size:12.5px; color:#8FA9C2; }
+.pg-hero-kpis { display:flex; gap:26px; flex-wrap:wrap; margin:11px 0 2px; }
+.pg-hero-kpis > div { display:flex; flex-direction:column; gap:2px; }
+.pg-hero-kpis span { font-family:'Share Tech Mono',monospace; font-size:8.5px; letter-spacing:.12em;
+  color:#5E7A96; text-transform:uppercase; }
+.pg-hero-kpis b { font-family:'Share Tech Mono',monospace; font-size:17px; font-weight:400; color:#EAF4FF; }
+.pg-hero-cta { margin-top:10px; font-size:12.5px; color:#C9D6E5; border-left:2px solid #00E5FF;
+  padding-left:10px; line-height:1.5; }
+.pg-hero-cta b { color:#EAF4FF; }
+@keyframes pgpulse { 0%,100%{opacity:1} 50%{opacity:.42} }
+.pg-pulse { animation:pgpulse 1.9s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .pg-pulse { animation:none; } }
+@media (max-width: 680px) {
+  .pg-hero { grid-template-columns:1fr; justify-items:start; gap:14px; padding:14px 15px; }
+  .pg-ring { width:104px; height:104px; }
+  .pg-ring-v { font-size:22px; }
+  .pg-hero-kpis { gap:16px; }
+  /* columnas apiladas: los botones y métricas no se recortan en móvil */
+  div[data-testid="stHorizontalBlock"] { flex-wrap:wrap !important; }
+  div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] { min-width:44% !important; }
+  div.stButton > button { white-space:nowrap; }
+}
+/* ---------- controles ---------- */
+div.stButton > button { border-radius:9px; border:1px solid rgba(128,170,210,.22);
+  background:rgba(12,22,34,.92); color:#DCE8F5; font-family:'Share Tech Mono',monospace;
+  font-size:11px; letter-spacing:.07em; padding:7px 13px; transition:.16s ease; }
+div.stButton > button:hover { border-color:rgba(0,229,255,.55); color:#EAF4FF;
+  background:rgba(0,229,255,.09); transform:translateY(-1px); }
+div.stButton > button:focus-visible { outline:2px solid #00E5FF; outline-offset:2px; }
+div[data-testid="stMetric"] { border:1px solid rgba(128,170,210,.14); border-radius:10px;
+  padding:9px 12px; background:rgba(8,14,24,.55); }
+div[data-testid="stAlert"] { border-radius:10px; }
 div[data-testid="stSidebar"] { background:#070c13; border-right:1px solid rgba(0,229,255,.12); }
 .pg-side-h { font-family:'Share Tech Mono',monospace; font-size:15px; color:#EAF4FF; letter-spacing:.04em; }
 .pg-side-s { color:#6E8AA6; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; margin-top:4px; }
@@ -424,17 +475,31 @@ ventaja_txt = (f"+{bench['ventaja_seg']} s" if bench["ventaja_seg"] is not None
                else ("CIEGO" if bench["tradicional_seg"] is None and bench["pyroguard_seg"] is not None else "—"))
 
 tone_ventaja = "pg-nom" if (bench["ventaja_seg"] or 0) > 0 else "pg-crit"
-resumen = (f"{proto['tipo_combustion']} · CO pico {proto['co_ppm_pico']:.0f} ppm · "
-           f"radiación {proto['radiative_peak_kwm2']:.2f} kW/m² · HCN {proto['hcn_ppm_pico']:.1f} ppm")
+ring = {"NOMINAL": GREEN, "PRE-IGNICIÓN": YELLOW, "CRÍTICO": RED}[nivel]
+pct = max(0.0, min(100.0, miri_max))
+_c = 2 * 3.141592653589793 * 52
+pulso = " pg-pulse" if nivel == "CRÍTICO" else ""
+first = proto["acciones_inmediatas"][0].split(":")[0].split(". ", 1)[-1]
+trad_txt = (f"{bench['tradicional_seg']} s" if bench["tradicional_seg"] is not None else "nunca")
 st.markdown(
-    f'<div class="pg-verdict">'
-    f'<div class="pg-verdict-m"><span class="pg-kpi-label">MIRI pico</span>'
-    f'<span class="pg-verdict-v {cls}">{miri_max:.1f} %</span></div>'
-    f'<div class="pg-verdict-m"><span class="pg-kpi-label">Nivel</span>'
-    f'<span class="pg-verdict-v {cls}">{nivel}</span></div>'
-    f'<div class="pg-verdict-m"><span class="pg-kpi-label">Ventaja IA</span>'
-    f'<span class="pg-verdict-v {tone_ventaja}">{ventaja_txt}</span></div>'
-    f'<div class="pg-verdict-d">{resumen}</div></div>', unsafe_allow_html=True)
+    f'<div class="pg-hero">'
+    f'<div class="pg-ring">'
+    f'<svg viewBox="0 0 120 120"><circle class="pg-ring-bg" cx="60" cy="60" r="52"/>'
+    f'<circle class="pg-ring-fg" cx="60" cy="60" r="52" stroke="{ring}" '
+    f'stroke-dasharray="{_c:.1f}" stroke-dashoffset="{_c * (1 - pct / 100):.1f}"/></svg>'
+    f'<span class="pg-ring-v" style="color:{ring}">{pct:.0f}<span style="font-size:13px">%</span></span>'
+    f'<span class="pg-ring-l">MIRI</span></div>'
+    f'<div><div class="pg-hero-top">'
+    f'<span class="pg-pill {cls}{pulso}">{nivel}</span>'
+    f'<span class="pg-hero-sub">{proto["tipo_combustion"]}</span></div>'
+    f'<div class="pg-hero-kpis">'
+    f'<div><span>Ventaja IA</span><b class="{tone_ventaja}">{ventaja_txt}</b></div>'
+    f'<div><span>Detector clásico</span><b>{trad_txt}</b></div>'
+    f'<div><span>CO pico</span><b>{proto["co_ppm_pico"]:.0f}<span style="font-size:9px"> ppm</span></b></div>'
+    f'<div><span>Radiación</span><b>{proto["radiative_peak_kwm2"]:.2f}<span style="font-size:9px"> kW/m²</span></b></div>'
+    f'<div><span>HCN pico</span><b>{proto["hcn_ppm_pico"]:.1f}<span style="font-size:9px"> ppm</span></b></div>'
+    f'</div><div class="pg-hero-cta">Siguiente acción: <b>{first}</b> · pasos completos en '
+    f'<b>RESPUESTA</b></div></div></div>', unsafe_allow_html=True)
 
 last = len(df) - 1
 t_last = float(df["timestamp_sec"].iloc[-1])  # eje X real: puede no ser 0..n con CSV irregulares
@@ -450,9 +515,16 @@ st.session_state.t_cursor = min(int(st.session_state.t_cursor), last)
 if "play" not in st.session_state:
     st.session_state.play = False
 
-pb, _ = st.columns([2, 6])
-with pb:
-    st.toggle("Playback · 8×", key="play", help="Reproduce la telemetría en tiempo acelerado")
+q1, q2, q3, q4 = st.columns([1.1, 1.5, 1.5, 2.6])
+if q1.button("⟲ Inicio", width="stretch", help="Llevar el cursor al segundo 0"):
+    st.session_state.t_cursor = 0
+if q2.button("⚑ Alerta IA", width="stretch", disabled=bench["pyroguard_seg"] is None,
+             help="Saltar al segundo en que el modelo avisó por primera vez"):
+    st.session_state.t_cursor = int(df.index[df.timestamp_sec == bench["pyroguard_seg"]][0])
+if q3.button("⚠ Pico MIRI", width="stretch", help="Saltar al instante de MIRI máximo"):
+    st.session_state.t_cursor = int(df.miri_score.idxmax())
+with q4:
+    st.toggle("Reproducir · 8×", key="play", help="Reproduce la telemetría en tiempo acelerado")
 
 
 def _style(fig, t_now, h=360, rows=3):
@@ -528,7 +600,8 @@ def live_panel():
         c[0].metric("Radiación pico", f"{df.radiative_heat_flux_kwm2.max():.2f} kW/m²")
         c[1].metric("Humo pico", f"{df.smoke_obscuration_pct_m.max():.2f} %/m")
         c[2].metric("O2 mínimo", f"{df.o2_pct.min():.2f} %", f"nominal {ps.ATM[atmosfera]['o2']:.1f} %")
-        st.caption("Zona sombreada = régimen posterior a la primera alerta IA · línea punteada cian = cursor temporal.")
+        st.caption("Zona sombreada = régimen posterior a la primera alerta IA · línea cian = cursor temporal. "
+                   "Usa los botones de arriba o el deslizador para moverte por la telemetría.")
 
     with tab2:
         g1, g2 = st.columns([2, 1])
