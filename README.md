@@ -23,15 +23,37 @@ tiempo se gana mirando la firma química en su lugar.
 
 ```bash
 python -m pip install -r requirements.txt
-streamlit run app.py
+streamlit run app.py --server.address 127.0.0.1
 ```
 
-Para servirlo fuera de tu equipo (enlace público temporal):
+El bind a `127.0.0.1` es deliberado: por defecto Streamlit escucha en toda la red local.
+
+Para servirlo fuera de tu equipo con un túnel temporal:
 
 ```bash
 cloudflared tunnel --url http://127.0.0.1:8501
-streamlit run app.py --server.enableCORS false --server.enableXsrfProtection false
+streamlit run app.py --server.address 127.0.0.1 \
+  --server.enableCORS false --server.enableXsrfProtection false
 ```
+
+Los dos overrides de CORS/XSRF solo hacen falta detrás de un proxy TLS: sin ellos la
+app se queda en "Please wait". No están en el `config.toml` a propósito, para no
+romper el despliegue en la nube.
+
+## Despliegue en Streamlit Community Cloud
+
+1. Entra en [share.streamlit.io](https://share.streamlit.io) con tu cuenta de GitHub.
+2. **New app** → repositorio `pyroguard-micro-g`, rama `master`, main file `app.py`.
+3. Opcional: en *Advanced settings* elige Python 3.12 y pega tu clave de NASA si algún
+día añades canales privados (hoy no hace falta ninguna).
+4. **Deploy**. La primera construcción tarda unos minutos.
+
+Atajo con el formulario ya relleno:
+<https://share.streamlit.io/deploy?repository=gaelopr/pyroguard-micro-g&branch=master&mainModule=app.py>
+
+Si el build falla en una dependencia, relaja el pin correspondiente en
+`requirements.txt` (`pandas==3.1.1` → `pandas>=3.0`): las versiones están fijadas a las
+que se probaron, no a las únicas compatibles.
 
 ## Qué es dato y qué no
 
@@ -84,6 +106,12 @@ docs/                  Documentación técnica
 - Sin canales de CO/HCN/humo en el feed público, el motor no puede puntuar datos reales.
 - El modo LIVE depende de un servicio de terceros; si NASA no publica valores, la app
   lo declara y no inventa cifras.
+
+## Créditos
+
+Datos de referencia: campañas **Saffire I–VI** y **BASS** de la NASA. El feed LIVE usa
+el servicio público `ISSLIVE` de NASA JSC vía Lightstreamer. Este proyecto no está
+afiliado a la NASA.
 
 ## Licencia
 
