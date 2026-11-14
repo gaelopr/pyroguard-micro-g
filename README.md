@@ -1,6 +1,7 @@
 # PyroGuard Micro-G
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://pyrogaurdmicrog.streamlit.app)
+[![tests](https://github.com/gaelopr/pyroguard-micro-g/actions/workflows/tests.yml/badge.svg)](https://github.com/gaelopr/pyroguard-micro-g/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 
@@ -90,7 +91,7 @@ y lo dice en pantalla en lugar de rellenar los huecos.
 python -m unittest discover -s tests -v
 ```
 
-23 comprobaciones en unos 4 s, sin dependencias nuevas: magnitudes de los cuatro
+Se ejecuta también en cada push con GitHub Actions. 23 comprobaciones en unos 4 s, sin dependencias nuevas: magnitudes de los cuatro
 escenarios, la ventaja de +323 s, el corte de ventilación, las conversiones del mapeador,
 el rechazo de datasets incompletos y las cifras exactas que se dicen en la demo. Si un
 cambio mueve un número del guion, la suite falla.
