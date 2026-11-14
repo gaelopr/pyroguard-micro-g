@@ -29,7 +29,7 @@
 | Título | **PyroGuard Micro-G** |
 | Enlace al proyecto | la URL de la app |
 | Repositorio | la URL del repo |
-| Vídeo / demo | *(tu parte: si el formulario pide vídeo, grábalo con el guion de 5 min)* |
+| Vídeo / demo | grábalo con [VIDEO_DEMO.md](VIDEO_DEMO.md): 6 tomas, 365 palabras de voz, 3 min |
 | Evidencia de participación del sábado | *(tu parte: fotos, capturas o el registro del equipo)* |
 
 ## Texto corto (para "descripción" o "resumen")
