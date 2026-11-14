@@ -55,6 +55,12 @@ div[data-testid="stWidgetLabel"] p { font-family:'Share Tech Mono',monospace; fo
   font-size:13px; color:#C9D6E5; line-height:1.45; }
 .pg-note { font-family:'Share Tech Mono',monospace; font-size:9.5px; letter-spacing:.14em; color:#3E5A73;
   text-align:center; margin-top:16px; }
+.pg-verdict { display:flex; gap:26px; align-items:center; flex-wrap:wrap; margin:2px 0 12px 0;
+  border:1px solid rgba(128,170,210,.18); border-left:3px solid #00E5FF; border-radius:10px;
+  padding:13px 18px; background:rgba(10,18,28,.66); }
+.pg-verdict-m { display:flex; flex-direction:column; gap:3px; min-width:96px; }
+.pg-verdict-v { font-family:'Share Tech Mono',monospace; font-size:23px; color:#EAF4FF; line-height:1.05; }
+.pg-verdict-d { flex:1 1 240px; font-size:12px; color:#8FA9C2; line-height:1.55; }
 div[data-testid="stSidebar"] { background:#070c13; border-right:1px solid rgba(0,229,255,.12); }
 .pg-side-h { font-family:'Share Tech Mono',monospace; font-size:15px; color:#EAF4FF; letter-spacing:.04em; }
 .pg-side-s { color:#6E8AA6; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; margin-top:4px; }
@@ -417,17 +423,18 @@ miri_max = float(df["miri_score"].max())
 ventaja_txt = (f"+{bench['ventaja_seg']} s" if bench["ventaja_seg"] is not None
                else ("CIEGO" if bench["tradicional_seg"] is None and bench["pyroguard_seg"] is not None else "—"))
 
-k = st.columns(5)
-for col, label, val, cl, small in [
-    (k[0], "MIRI pico", f"{miri_max:.1f}%", cls, ""),
-    (k[1], "Nivel amenaza", nivel, cls, "pg-kpi-sm"),
-    (k[2], "Ventaja IA", ventaja_txt, "pg-nom" if (bench["ventaja_seg"] or 0) > 0 else "pg-crit", "pg-kpi-sm"),
-    (k[3], "CO pico (ppm)", f"{proto['co_ppm_pico']:.0f}", "", ""),
-    (k[4], "Rad. pico (kW/m²)", f"{proto['radiative_peak_kwm2']:.2f}", "", ""),
-]:
-    with col:
-        st.markdown(f'<div class="pg-card"><div class="pg-kpi-label">{label}</div>'
-                    f'<div class="pg-kpi {cl} {small}">{val}</div></div>', unsafe_allow_html=True)
+tone_ventaja = "pg-nom" if (bench["ventaja_seg"] or 0) > 0 else "pg-crit"
+resumen = (f"{proto['tipo_combustion']} · CO pico {proto['co_ppm_pico']:.0f} ppm · "
+           f"radiación {proto['radiative_peak_kwm2']:.2f} kW/m² · HCN {proto['hcn_ppm_pico']:.1f} ppm")
+st.markdown(
+    f'<div class="pg-verdict">'
+    f'<div class="pg-verdict-m"><span class="pg-kpi-label">MIRI pico</span>'
+    f'<span class="pg-verdict-v {cls}">{miri_max:.1f} %</span></div>'
+    f'<div class="pg-verdict-m"><span class="pg-kpi-label">Nivel</span>'
+    f'<span class="pg-verdict-v {cls}">{nivel}</span></div>'
+    f'<div class="pg-verdict-m"><span class="pg-kpi-label">Ventaja IA</span>'
+    f'<span class="pg-verdict-v {tone_ventaja}">{ventaja_txt}</span></div>'
+    f'<div class="pg-verdict-d">{resumen}</div></div>', unsafe_allow_html=True)
 
 last = len(df) - 1
 t_last = float(df["timestamp_sec"].iloc[-1])  # eje X real: puede no ser 0..n con CSV irregulares
@@ -482,24 +489,20 @@ def live_panel():
             f'<span class="pg-chip-v {tone}">{val}<i>{unit}</i></span></div>'
             for lab, val, unit, tone in [
                 ("temp", f"{live['temp_c']:.2f}", "°C", ""),
-                ("O2", f"{live['o2_pct']:.2f}", "%", ""),
                 ("CO", f"{live['co_ppm']:.1f}", "ppm", "pg-crit" if live["co_ppm"] > 50 else ""),
-                ("HCN", f"{live['hcn_ppm']:.2f}", "ppm", "pg-crit" if live["hcn_ppm"] > 5 else ""),
                 ("MIRI", f"{live_miri:.0f}", "%", live_cls),
                 ("IA", "ALERTA" if bool(live["ia_alerta"]) else "estable", "", live_cls),
             ])
         + "</div>", unsafe_allow_html=True)
 
-    tab1, tab2, tab3, tab4 = st.tabs(["TELEMETRÍA", "DETECCIÓN IA", "PROTOCOLO EXPERTO", "DATOS / EXPORT"])
+    tab1, tab2, tab3 = st.tabs(["ESTADO", "DETECCIÓN", "RESPUESTA"])
 
     with tab1:
-        fig = make_subplots(rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.055,
-                            row_heights=[0.27, 0.27, 0.23, 0.23],
-                            specs=[[{"secondary_y": True}], [{"secondary_y": True}],
-                                   [{"secondary_y": True}], [{}]],
+        fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.10,
+                            row_heights=[0.46, 0.54],
+                            specs=[[{"secondary_y": True}], [{"secondary_y": True}]],
                             subplot_titles=("Temperatura de rack vs ventilación (inercia térmica en 0g)",
-                                            "Firma química: CO · HCN · CO2",
-                                            "Radiación IR · Humo", "Oxígeno local (MCA)"))
+                                            "Firma química: CO · HCN · CO2"))
         fig.add_trace(go.Scatter(x=df.timestamp_sec, y=df.temp_c, name="temp_c (°C)",
                                  line=dict(color=ORANGE, width=2)), row=1, col=1)
         fig.add_trace(go.Scatter(x=df.timestamp_sec, y=df.airflow_cms, name="airflow (cm/s)",
@@ -510,15 +513,8 @@ def live_panel():
                                  line=dict(color=VIOLET, width=1.8)), row=2, col=1)
         fig.add_trace(go.Scatter(x=df.timestamp_sec, y=df.co2_ppm, name="CO2 (ppm)",
                                  line=dict(color=YELLOW, width=1.2)), row=2, col=1, secondary_y=True)
-        fig.add_trace(go.Scatter(x=df.timestamp_sec, y=df.radiative_heat_flux_kwm2, name="rad (kW/m²)",
-                                 line=dict(color=ORANGE, width=2), fill="tozeroy",
-                                 fillcolor="rgba(255,107,53,.13)"), row=3, col=1)
-        fig.add_trace(go.Scatter(x=df.timestamp_sec, y=df.smoke_obscuration_pct_m, name="humo (%/m)",
-                                 line=dict(color="#9AA7B4", width=1.6)), row=3, col=1, secondary_y=True)
-        fig.add_trace(go.Scatter(x=df.timestamp_sec, y=df.o2_pct, name="O2 (%)",
-                                 line=dict(color=GREEN, width=2)), row=4, col=1)
         if bench["pyroguard_seg"] is not None:
-            for r in range(1, 5):
+            for r in range(1, 3):
                 fig.add_vrect(x0=bench["pyroguard_seg"], x1=t_last, fillcolor="rgba(255,59,48,.06)",
                               line_width=0, layer="below", row=r, col=1)
         fig.update_yaxes(title_text="°C", row=1, col=1)
@@ -526,16 +522,12 @@ def live_panel():
                          range=[0, max(24.0, float(df.airflow_cms.max()) * 1.2)])
         fig.update_yaxes(title_text="ppm", row=2, col=1)
         fig.update_yaxes(title_text="CO2 ppm", row=2, col=1, secondary_y=True, showgrid=False)
-        fig.update_yaxes(title_text="kW/m²", row=3, col=1)
-        fig.update_yaxes(title_text="%/m", row=3, col=1, secondary_y=True, showgrid=False)
-        fig.update_yaxes(title_text="%", row=4, col=1)
-        st.plotly_chart(_style(fig, float(df.timestamp_sec.iloc[int(t_now)]), 700, rows=4),
+        st.plotly_chart(_style(fig, float(df.timestamp_sec.iloc[int(t_now)]), 470, rows=2),
                         config=PCFG, width="stretch")
         c = st.columns(3)
-        c[0].metric("ΔT máximo", f"{df.temp_c.max() - df.temp_c.iloc[0]:+.2f} °C",
-                    "Alarma térmica 45 °C nunca alcanzada" if df.temp_c.max() < 45 else "Umbral térmico superado")
-        c[1].metric("O2 mínimo", f"{df.o2_pct.min():.2f} %", f"nominal {ps.ATM[atmosfera]['o2']:.1f} %")
-        c[2].metric("CO2 pico", f"{df.co2_ppm.max():.0f} ppm")
+        c[0].metric("Radiación pico", f"{df.radiative_heat_flux_kwm2.max():.2f} kW/m²")
+        c[1].metric("Humo pico", f"{df.smoke_obscuration_pct_m.max():.2f} %/m")
+        c[2].metric("O2 mínimo", f"{df.o2_pct.min():.2f} %", f"nominal {ps.ATM[atmosfera]['o2']:.1f} %")
         st.caption("Zona sombreada = régimen posterior a la primera alerta IA · línea punteada cian = cursor temporal.")
 
     with tab2:
@@ -609,11 +601,13 @@ def live_panel():
                         f"**ΔT:** {proto['temp_peak_c'] - proto['temp_baseline_c']:+.2f} °C · "
                         f"**O2 mín:** {proto['o2_min_pct']} %")
 
-    with tab4:
-        st.dataframe(df, width="stretch", height=430)
-        st.download_button("⬇️ Descargar telemetría + IA (CSV)", df.to_csv(index=False).encode("utf-8"),
-                           f"pyroguard_{nivel.lower()}.csv", "text/csv")
-        st.caption(f"{len(df)} muestras · {len(df.columns)} columnas · anomaly_score, ia_alerta y miri_score incluidos.")
+    with tab1:
+        with st.expander("Datos y exportación"):
+            st.dataframe(df, width="stretch", height=340)
+            st.download_button("⬇️ Descargar telemetría + IA (CSV)", df.to_csv(index=False).encode("utf-8"),
+                               f"pyroguard_{nivel.lower()}.csv", "text/csv")
+            st.caption(f"{len(df)} muestras · {len(df.columns)} columnas · anomaly_score, "
+                       "ia_alerta y miri_score incluidos.")
 
 
 live_panel()

@@ -75,6 +75,25 @@ El feed público solo publica temperatura y presión de cabina del US Lab. No ha
 CO2, HCN, humo ni radiación en abierto: la app **no puntúa MIRI sobre datos reales**
 y lo dice en pantalla en lugar de rellenar los huecos.
 
+## Datos de la NASA utilizados
+
+Requisito del reto: al menos un recurso de datos de la NASA. Aquí hay uno **en vivo**.
+
+| Recurso | Uso | Código |
+|---|---|---|
+| **ISSLIVE** — telemetría pública de NASA JSC vía Lightstreamer | Temperatura (`USLAB000059`) y presión (`USLAB000058`) de cabina del US Lab, en el modo LIVE | `iss_live.py` |
+| `TIME_000001` (GMT) | Marca temporal de cada muestra | `iss_live.py` |
+
+- Endpoint: `GET https://push.lightstreamer.com/lightstreamer/create_session.txt`, protocolo TLCP, adapter set `ISSLIVE`.
+- Público y sin credenciales: la app desplegada lo consulta en vivo desde los servidores de Streamlit.
+- Los otros cinco canales del modelo (CO, CO2, HCN, humo, radiación) **no** existen
+  en el feed público. La app declara la cobertura y no rellena los huecos.
+
+**Referencias de comportamiento** (no se usan como dataset crudo): campañas
+**Saffire I–VI** y **BASS** de la NASA sobre propagación de llama en microgravedad y
+ausencia de convección natural. El `demo_saffire_sintetico.csv` es sintético y su
+nombre lo dice.
+
 ## Cifras de referencia (reproducibles)
 
 | Escenario | MIRI | Temp | CO | Nota |
@@ -99,18 +118,20 @@ cambio mueve un número del guion, la suite falla.
 ## Estructura
 
 ```
-app.py                 UI Streamlit (Mission Control dark), 4 pestañas y modo LIVE
+app.py                 UI Streamlit (Mission Control dark): 3 pestañas y modo LIVE
 physics_simulator.py   Modelo físico: escenarios, atmósferas, corte de ventilación
 anomaly_engine.py      Mapeo de CSV con unidades, IsolationForest, MIRI, protocolo
 iss_live.py            Cliente TLCP propio + buffer de muestras reales
 demo_saffire_sintetico.csv   Dataset de demostración (sintético, unidades crudas)
 tests/test_pyroguard.py     Regresión de las cifras del guion y de los escenarios
 GUION_DEMO.md          Guion de presentación de 5 minutos
-docs/                  Documentación técnica
+docs/                  Documentación: persona, diseño, arquitectura, física, IA, datos, LIVE
 ```
 
 ## Documentación
 
+- [Persona y caso de uso](docs/PERSONA.md) — quién usa la app y qué decide
+- [Decisiones de diseño](docs/DISENO.md) — tres ideas, qué se descartó y checklist UX
 - [Arquitectura y flujo de datos](docs/ARQUITECTURA.md)
 - [Modelo físico](docs/MODELO_FISICO.md)
 - [Motor de detección: IsolationForest y MIRI](docs/MOTOR_IA.md)

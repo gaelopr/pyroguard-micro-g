@@ -6,7 +6,7 @@ proceso de Streamlit; no hay base de datos ni estado compartido más allá del f
 ```
                  ┌───────────────────────────────┐
                  │            app.py             │
-                 │  UI · estado · 4 pestañas     │
+                 │  UI · estado · 3 pestañas     │
                  └───────┬───────────────┬───────┘
                          │               │
         ┌────────────────▼──┐   ┌────────▼─────────┐
@@ -47,7 +47,7 @@ Los tres caminos de entrada convergen en el mismo DataFrame de 9 columnas:
 3. `detectar_anomalias` entrena el baseline, puntúa y añade las columnas de IA.
 4. `calcular_ventaja_deteccion` compara la primera alerta IA con la del detector
    tradicional. `generar_protocolo_respuesta` clasifica el evento y redacta el protocolo.
-5. `app.py` dibuja KPIs, cuatro pestañas y el panel de inferencia si está activo.
+5. `app.py` dibuja el veredicto, tres pestañas y el panel de inferencia si está activo.
 
 ## Decisiones de diseño
 

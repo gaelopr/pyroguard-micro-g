@@ -20,7 +20,7 @@ Aclarar en la primera frase: **"la telemetría de los simuladores es física sim
 
 ## 0:30 – 1:05 · Estado nominal
 
-**Pantalla:** cabecera + 5 tarjetas + tab **TELEMETRÍA**.
+**Pantalla:** cabecera con el veredicto + tab **ESTADO**.
 
 > "Este es el estado sano: 23 °C estables, CO 2,8 ppm, CO2 4 100. El índice MIRI marca 19,9 % y el nivel es NOMINAL. El motor no tiene umbrales escritos a mano: aprende el baseline de los primeros 60 s y solo avisa cuando la telemetría se sale de esa distribución estadística."
 
@@ -34,7 +34,7 @@ Señalar: el cursor cian, la zona sombreada y que las gráficas son 600 muestras
 
 > "Quema sostenida por la corriente de ventilación: CO 192 ppm, CO2 casi 10 000, radiación 4,5 kW/m², humo 5,5 %/m. MIRI 98 %."
 
-**Clic:** tab **DETECCIÓN IA**.
+**Clic:** tab **DETECCIÓN**.
 
 > "La línea verde es la primera alerta del modelo: **segundo 180**. La roja es el detector tradicional, el que mira temperatura y humo: **segundo 503**. Son **323 segundos de ventaja**. A 1 Hz eso es tiempo real para cerrar el rack antes de que el fuego viaje por la corriente de ventilación."
 
@@ -56,7 +56,7 @@ Si preguntan por la curva: IsolationForest sobre tasas suavizadas + MIRI determi
 
 ## 2:40 – 3:15 · Qué hacer, no solo qué pasa
 
-**Clic:** tab **PROTOCOLO EXPERTO**.
+**Clic:** tab **RESPUESTA**.
 
 > "No dice 'hay humo'. Dice qué se apaga y en qué orden: aislamiento de ventilación, desenergizar las barras RPCM del rack, máscaras PBA si CO o HCN pasan umbral, descarga del extintor de CO2 sin abrir la puerta, y verificación con CSA-CP antes de reingresar. Es el flight rule convertido en texto operativo, generado desde los datos de esa quema concreta."
 
