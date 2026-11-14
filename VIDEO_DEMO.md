@@ -1,8 +1,8 @@
 # Vídeo demo · 3 minutos
 
-Guion para grabar hoy. **365 palabras de voz** ≈ 2:40 hablado a ritmo normal, que con
-pausas y transiciones llega a 3:00. Grábalo en **6 tomas separadas** y únelas: es mucho
-más rápido que buscar la toma perfecta.
+Guion para grabar hoy. **≈350 palabras de voz** ≈ 2:25 a ritmo normal; con las pausas y
+las transiciones de pantalla llega a **2:55–3:00**. Grábalo en **6 tomas separadas** y
+únelas: es mucho más rápido que buscar la toma perfecta.
 
 ## Antes de grabar (10 min)
 
@@ -24,15 +24,17 @@ más rápido que buscar la toma perfecta.
 > aire caliente no sube. Un cable que empieza a arder no calienta el techo, calienta el
 > propio cable. Por eso los detectores de humo y de temperatura llegan tarde."
 
-### Toma 2 · La idea (0:18 – 0:40) · pantalla: veredicto y **ESTADO**
+### Toma 2 · La idea y el usuario (0:18 – 0:50) · pantalla: veredicto y **ESTADO**
 
 > "PyroGuard Micro-G mira lo que cambia antes: la química del aire. Cada segundo puntúa
 > CO, CO2, HCN y radiación, y lo compara con cómo era todo en los primeros 60 segundos de
-> operación normal. Sin datos etiquetados: aprende lo nominal y avisa cuando se sale."
+> operación normal. Sin datos etiquetados: aprende lo nominal y avisa cuando se sale. Lo
+> usa una controladora de carga que tiene que decidir en segundos si eso es ruido del
+> sensor o el principio de un incendio."
 
 *Acción:* mueve despacio el **cursor temporal** una vez, para que se vea que todo cambia a la vez.
 
-### Toma 3 · El caso Saffire (0:40 – 1:25) · el momento clave
+### Toma 3 · El caso Saffire (0:50 – 1:30) · el momento clave
 
 *Acción:* escenario → **Ventilation-Driven Flame Spread**. Espera a que se redibuje.
 Luego tab **DETECCIÓN**.
@@ -44,7 +46,7 @@ Luego tab **DETECCIÓN**.
 
 *Edición:* haz **zoom al gráfico** (150 %) durante esta frase — es el número que se recuerda.
 
-### Toma 4 · Los fuegos que nadie ve (1:25 – 2:00)
+### Toma 4 · Los fuegos que nadie ve (1:30 – 2:05)
 
 *Acción:* escenario → **Smoldering Avionics**, luego **Cool Flame**.
 
@@ -53,7 +55,7 @@ Luego tab **DETECCIÓN**.
 > dispara nunca. Y llama fría: 23,4 grados, humo casi cero, CO2 a 6 200. El modelo lo
 > marca en pre-ignición."
 
-### Toma 5 · Qué hacer (2:00 – 2:30) · tab **RESPUESTA**, luego corte
+### Toma 5 · Qué hacer (2:05 – 2:35) · tab **RESPUESTA**, luego corte
 
 *Acción:* tab **RESPUESTA**; después, escenario Saffire con **corte de ventilación = 220**.
 
@@ -61,7 +63,7 @@ Luego tab **DETECCIÓN**.
 > número uno. Se puede probar: con corte en el segundo 220, el CO baja de 192 a 33 ppm.
 > En microgravedad, cerrar el aire es el mejor extintor."
 
-### Toma 6 · Honestidad y cierre (2:30 – 3:00)
+### Toma 6 · Honestidad y cierre (2:35 – 3:00)
 
 *Acción:* modo **Subir Dataset Real** → sube `demo_saffire_sintetico.csv` → se ve el
 informe "7 de 8 canales". Después, volver a **Simulador · Nominal**.
