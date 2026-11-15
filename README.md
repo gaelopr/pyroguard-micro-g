@@ -181,6 +181,8 @@ docs/                  Documentación: persona, diseño, arquitectura, física, 
 ## Documentación
 
 - [Checklist de entrega](ENTREGA.md) — enlaces, texto listo para el formulario y plan B
+- [Diapositivas](docs/presentacion.html) — 7 slides en HTML, con flechas para navegar y **P** (o Ctrl+P) para exportar el PDF
+- [Guion de las diapositivas](docs/GUION_SLIDES.md) — qué decir en cada una (4 min), versión de 30 s y preguntas probables
 - [Guion del vídeo de 3 min](VIDEO_DEMO.md) — tomas, voz y edición
 - [Persona y caso de uso](docs/PERSONA.md) — quién usa la app y qué decide
 - [Decisiones de diseño](docs/DISENO.md) — tres ideas, qué se descartó, checklist UX y wireframe de las tres pantallas

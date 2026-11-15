@@ -35,6 +35,7 @@
 | Repositorio | la URL del repo |
 | Demo para el formulario | **30 s** con el guion corto de [VIDEO_DEMO.md](VIDEO_DEMO.md); súbelo a YouTube (público o no listado) y pega la URL completa |
 | Vídeo de presentación | 3 min con el guion largo de [VIDEO_DEMO.md](VIDEO_DEMO.md): 332 palabras, 6 tomas |
+| Diapositivas (máx. 7) | [docs/presentacion.html](docs/presentacion.html) → **Ctrl+P → Guardar como PDF**, horizontal y sin márgenes; una slide por página. Qué decir, en [docs/GUION_SLIDES.md](docs/GUION_SLIDES.md) |
 | Uso de SI | marcar *Writing/Editing/Translation*, *Coding/Debugging/Troubleshooting* y *Research/Information Gathering*; la declaración está en el README, sección «Uso de herramientas de IA» |
 | Datos de la NASA | ISSLIVE (Lightstreamer) y las tres investigaciones de PSI (Saffire I/II/III), con URL completa |
 | Evidencia de participación del sábado | *(tu parte: fotos, capturas o el registro del equipo)* |

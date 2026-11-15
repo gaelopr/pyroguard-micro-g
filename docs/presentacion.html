@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PyroGuard Micro-G · presentación (7 diapositivas)</title>
+<meta name="description" content="PyroGuard Micro-G, detección temprana de incendio en microgravedad. NASA Space Apps Challenge 2026. Presentación asistida por IA (declaración en el README).">
+<style>
+  :root{
+    --bg:#05080d; --panel:#0b1220; --ink:#dbe7f5; --dim:#8aa4bf; --faint:#4b6478;
+    --cyan:#22d3ee; --orange:#ff6b35; --green:#34d399; --red:#f87171; --yellow:#fbbf24;
+    --line:rgba(140,180,220,.16);
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{height:100%}
+  body{
+    background:#000; color:var(--ink);
+    font-family:"Inter",-apple-system,"Segoe UI",Roboto,sans-serif;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .deck{position:relative; width:min(100vw, 177.78vh); height:min(56.25vw, 100vh); background:var(--bg); overflow:hidden}
+  .slide{
+    position:absolute; inset:0; padding:4.5% 5.5% 5%;
+    display:flex; flex-direction:column; justify-content:center; gap:2.2vh;
+    background:
+      radial-gradient(60% 55% at 12% 0%, rgba(34,211,238,.10), transparent 62%),
+      radial-gradient(50% 45% at 92% 4%, rgba(255,107,53,.08), transparent 62%),
+      var(--bg);
+    opacity:0; transition:opacity .22s ease; pointer-events:none;
+  }
+  .slide.on{opacity:1; pointer-events:auto}
+  h1{font-size:6.4vh; line-height:1.03; letter-spacing:-.02em; color:#f2f8ff; font-weight:800}
+  h2{font-size:4.1vh; line-height:1.12; letter-spacing:-.01em; color:#eef6ff; font-weight:800}
+  h3{font-size:2.05vh; letter-spacing:.22em; text-transform:uppercase; color:var(--cyan); font-weight:600}
+  p,li{font-size:2.35vh; line-height:1.5; color:var(--ink)}
+  .lead{font-size:2.7vh; color:#cfe0f0}
+  .dim{color:var(--dim)} .faint{color:var(--faint)}
+  .tag{display:inline-block; border:1px solid var(--line); border-radius:999px; padding:.5vh 1.6vh;
+       font-size:1.65vh; letter-spacing:.16em; text-transform:uppercase; color:var(--dim)}
+  .tag.cy{color:var(--cyan); border-color:rgba(34,211,238,.45)}
+  .tag.or{color:var(--orange); border-color:rgba(255,107,53,.45)}
+  .stats{display:flex; gap:3.2vh; flex-wrap:wrap}
+  .stat b{display:block; font-size:5.4vh; line-height:1; color:#fff; letter-spacing:-.02em}
+  .stat span{display:block; margin-top:.7vh; font-size:1.7vh; letter-spacing:.13em; text-transform:uppercase; color:var(--dim)}
+  .stat.cy b{color:var(--cyan)} .stat.or b{color:var(--orange)} .stat.gr b{color:var(--green)}
+  .cols{display:flex; gap:5%; align-items:center}
+  .cols>*{flex:1; min-width:0}
+  ul{list-style:none; display:flex; flex-direction:column; gap:1.1vh}
+  li{position:relative; padding-left:2.6vh}
+  li::before{content:""; position:absolute; left:0; top:1.05vh; width:1.15vh; height:1.15vh;
+             border-radius:50%; background:var(--cyan); opacity:.85}
+  li.or::before{background:var(--orange)} li.gr::before{background:var(--green)}
+  .shot{border:1px solid var(--line); border-radius:1.2vh; width:100%; display:block;
+        box-shadow:0 2.4vh 5vh -2.2vh rgba(0,0,0,.9)}
+  .framed{overflow:hidden; border-radius:1.2vh}
+  .note{border-left:2px solid var(--orange); padding-left:1.8vh; font-size:2.1vh; color:#cfe0f0}
+  table{border-collapse:collapse; width:100%; font-size:2vh}
+  th,td{text-align:left; padding:1.05vh 1.2vh; border-bottom:1px solid var(--line)}
+  th{font-size:1.6vh; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); font-weight:600}
+  td b{color:#fff}
+  .bars{display:flex; flex-direction:column; gap:1.4vh}
+  .bar{display:grid; grid-template-columns:13vh 1fr 9vh; align-items:center; gap:1.6vh; font-size:1.9vh}
+  .bar .track{height:2.6vh; background:rgba(255,255,255,.06); border-radius:.4vh; overflow:hidden}
+  .bar .fill{height:100%; border-radius:.4vh}
+  .bar .v{text-align:right; font-variant-numeric:tabular-nums; color:#fff}
+  .foot{position:absolute; left:5.5%; right:5.5%; bottom:2.6%;
+        display:flex; justify-content:space-between; align-items:center;
+        font-size:1.5vh; letter-spacing:.14em; text-transform:uppercase; color:var(--faint)}
+  .ring{position:relative; width:22vh; height:22vh}
+  .ring svg{width:100%; height:100%; transform:rotate(-90deg)}
+  .ring .v{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center}
+  .ring .v b{font-size:5.2vh; color:#fff; line-height:1}
+  .ring .v span{font-size:1.5vh; letter-spacing:.2em; color:var(--dim); margin-top:.6vh}
+  .kicker{display:flex; gap:1.2vh; flex-wrap:wrap}
+  .nav{position:fixed; top:1.3vh; right:1.4vh; display:flex; gap:.7vh; z-index:9; opacity:.3; transition:opacity .2s}
+  .nav:hover{opacity:1}
+  .nav button{background:rgba(255,255,255,.07); color:var(--ink); border:1px solid var(--line);
+              border-radius:.6vh; padding:.45vh .9vh; font-size:1.4vh; cursor:pointer; line-height:1}
+  .hint{position:fixed; bottom:.7vh; left:50%; transform:translateX(-50%); font-size:1.3vh;
+        letter-spacing:.1em; color:var(--faint); z-index:9; opacity:.45}
+  @media print{
+    @page{size:297mm 167mm; margin:0}
+    body{display:block; overflow:visible; background:#fff}
+    .deck{width:100%; height:auto; overflow:visible}
+    .slide{position:relative; inset:auto; width:100%; height:167mm; opacity:1 !important;
+           page-break-after:always; break-after:page; pointer-events:auto}
+    .nav,.hint{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide on">
+    <div class="kicker">
+      <span class="tag cy">NASA Space Apps Challenge 2026</span>
+      <span class="tag">Open science · datos públicos</span>
+    </div>
+    <h1>PyroGuard<br>Micro-G</h1>
+    <p class="lead" style="max-width:74%">Detección temprana de incendio en microgravedad a partir de la
+      <b>química del aire</b>, no del calor. Local, determinista y auditable.</p>
+    <div class="stats">
+      <div class="stat cy"><b>+325 s</b><span>de ventaja</span></div>
+      <div class="stat gr"><b>180/180</b><span>detecciones</span></div>
+      <div class="stat or"><b>0/90</b><span>falsas alarmas</span></div>
+    </div>
+    <div class="foot"><span>PyroGuard Micro-G</span><span>01 / 07</span></div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <h3>El problema</h3>
+    <h2>En el espacio, el fuego no sube.</h2>
+    <div class="cols">
+      <div>
+        <ul>
+          <li>Sin gravedad no hay flotabilidad: el aire caliente <b>no asciende</b>.</li>
+          <li>Un cable que empieza a arder calienta el cable, no el techo.</li>
+          <li>El detector de humo y temperatura espera un cambio físico que tarda o no llega.</li>
+          <li class="or">La llama se sostiene con la ventilación del rack: 20 cm/s bastan.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="note">
+          Lo que sí cambia primero es la <b>composición del aire</b>: CO, CO₂, HCN y radiación
+          aparecen antes que el calor medible.<br><br>
+          Ese desfase es el que la app convierte en segundos de actuación.
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Microgravedad · EXPRESS rack</span><span>02 / 07</span></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <h3>Qué construimos</h3>
+    <h2>Un veredicto por segundo, con la acción al lado.</h2>
+    <div class="cols">
+      <div>
+        <ul>
+          <li><b>MIRI</b>: índice determinista y explicable (CO, pérdida de O₂, HCN, radiación, caudal).</li>
+          <li><b>IsolationForest</b> entrenado a bordo con los primeros 60 s nominales: sin datos etiquetados.</li>
+          <li>El veredicto usa <b>solo las muestras hasta el cursor</b>: no anuncia un incendio que aún no empezó.</li>
+          <li class="gr">Cuando el riesgo sube, entrega la <b>siguiente acción</b> del protocolo de 5 pasos.</li>
+        </ul>
+      </div>
+      <div style="flex:.85" class="framed">
+        <img class="shot" src="img/publico.png" alt="Interfaz de PyroGuard Micro-G con el veredicto">
+      </div>
+    </div>
+    <div class="foot"><span>Interfaz real · app desplegada</span><span>03 / 07</span></div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <h3>La prueba</h3>
+    <h2>No es una demo bonita: es un protocolo repetible.</h2>
+    <div class="cols" style="align-items:stretch">
+      <div style="display:flex; flex-direction:column; justify-content:center; gap:2.2vh">
+        <p class="dim" style="font-size:1.8vh; letter-spacing:.14em; text-transform:uppercase">Primera alarma · propagación Saffire</p>
+        <div class="bars">
+          <div class="bar"><span class="dim">PyroGuard</span><div class="track"><div class="fill" style="width:27%;background:var(--cyan)"></div></div><span class="v" style="color:var(--cyan)">178 s</span></div>
+          <div class="bar"><span class="dim">Umbrales fijos</span><div class="track"><div class="fill" style="width:76%;background:var(--orange)"></div></div><span class="v" style="color:var(--orange)">503 s</span></div>
+        </div>
+        <p class="dim" style="font-size:1.8vh">30 repeticiones con ruido distinto · atmósfera ISS. En aire enriquecido (34 % O₂) la ventaja es <b style="color:#fff">+226 s</b>.</p>
+        <p class="note" style="font-size:1.95vh">Ciego en 4 de los 6 casos de incendio. Cuando llega a verlo, llega <b>325 s</b> tarde.</p>
+      </div>
+      <div>
+        <table>
+          <tr><th>Clase</th><th>IA</th><th>Clásico</th></tr>
+          <tr><td>Pirólisis de Kapton</td><td><b>30/30</b></td><td>0/30</td></tr>
+          <tr><td>Propagación (Saffire)</td><td><b>30/30</b></td><td>30/30</td></tr>
+          <tr><td>Llama fría oxidativa</td><td><b>30/30</b></td><td>0/30</td></tr>
+          <tr><td>Sin fuego (incl. corte de ventilación)</td><td><b>0/90</b></td><td>0/90</td></tr>
+        </table>
+        <p class="faint" style="margin-top:1vh; font-size:1.55vh">Atmósfera ISS · 30 corridas por fila</p>
+      </div>
+    </div>
+    <div class="foot"><span><code>python validation.py</code> · 270 corridas</span><span>04 / 07</span></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <h3>Datos de la NASA</h3>
+    <h2>Dos fuentes reales, ninguna inventada.</h2>
+    <div class="cols" style="align-items:flex-start">
+      <div>
+        <ul>
+          <li><b>ISSLIVE</b> en vivo: 12 canales públicos del US Lab y Node 3, y declaración explícita de lo que NASA no publica.</li>
+          <li><b>PSI</b> (Saffire I–III): tablas experimentales CC0 descargadas en vivo, con DOI, tamaño y SHA-256.</li>
+        </ul>
+        <div class="note" style="margin-top:1.4vh">
+          Con el mismo ~22 % de O₂, la silicona se apaga sola (~0 cm) y la tela SIBAL se consume entera
+          (29 cm en 145 s). <b>Lo que decide es el material</b>, no el oxígeno.
+        </div>
+      </div>
+      <div style="flex:.9" class="framed">
+        <img class="shot" src="img/ia.png" alt="Pantalla de detección con MIRI y la alerta de la IA">
+      </div>
+    </div>
+    <div class="foot"><span>ISSLIVE · NASA PSI · CC0</span><span>05 / 07</span></div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <h3>Ingeniería</h3>
+    <h2>Se puede auditar en una tarde.</h2>
+    <div class="cols" style="align-items:flex-start">
+      <div>
+        <ul>
+          <li>Todo <b>local</b>: sin API keys, sin telemetría saliendo de la app.</li>
+          <li>Cuatro modos: simulador, ISSLIVE en vivo, histórico PSI y <b>tu CSV</b>.</li>
+          <li>El CSV se valida: unidades (K/°F, fracción/%/ppm, m/s, W/m²), rangos y canales mínimos.</li>
+          <li class="gr">Si falta lo mínimo, <b>se niega a diagnosticar</b>.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="stats" style="gap:3vh">
+          <div class="stat"><b>34</b><span>tests en CI</span></div>
+          <div class="stat"><b>4</b><span>modos</span></div>
+          <div class="stat cy"><b>0</b><span>API keys</span></div>
+        </div>
+        <p class="dim" style="margin-top:2vh; font-size:1.9vh">
+          Python 3.12 · Streamlit · pandas · NumPy · scikit-learn · Plotly<br>
+          Cliente TLCP propio para Lightstreamer, sin dependencias.
+        </p>
+      </div>
+    </div>
+    <div class="foot"><span>Reproducible · MIT</span><span>06 / 07</span></div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <h3>Impacto y límites</h3>
+    <h2>Gana los segundos en los que todavía puedes actuar.</h2>
+    <div class="cols" style="align-items:flex-start">
+      <div>
+        <ul>
+          <li>Encaja en la telemetría de un <b>rack presurizado</b> de la ISS y en arquitecturas tipo Gateway/Artemis, donde el O₂ sube al 34 %.</li>
+          <li>No sustituye a los detectores certificados: <b>los adelanta</b>.</li>
+        </ul>
+        <div class="note" style="margin-top:1.4vh; border-color:var(--red)">
+          <b>Límites declarados:</b> prototipo no certificado para vuelo; la telemetría de escenarios es
+          simulación física; el feed público no trae CO, HCN, humo ni flujo radiativo.
+        </div>
+      </div>
+      <div style="flex:.8">
+        <div class="ring">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="var(--orange)" stroke-width="9"
+                    stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="8"/>
+          </svg>
+          <div class="v"><b>98 %</b><span>MIRI</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:1vh">
+      <b>pyroguardmicrog.streamlit.app</b> · github.com/gaelopr/pyroguard-micro-g
+    </p>
+    <div class="foot">
+      <span>Contenido y código asistidos por IA · declaración en el README</span><span>07 / 07</span>
+    </div>
+  </section>
+</div>
+
+<div class="nav">
+  <button id="prev" aria-label="Anterior">◀</button>
+  <button id="next" aria-label="Siguiente">▶</button>
+</div>
+<div class="hint">← → · espacio · P para imprimir</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = 0;
+  const show = n => {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('on', k === i));
+    if (history.replaceState) history.replaceState(null, '', '#' + (i + 1));
+  };
+  const next = () => show(i + 1);
+  const prev = () => show(i - 1);
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'ArrowDown', ' ', 'PageDown', 'Enter'].includes(e.key)) { e.preventDefault(); next(); }
+    if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); prev(); }
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(slides.length - 1);
+    if (e.key.toLowerCase() === 'p') { e.preventDefault(); print(); }
+  });
+  addEventListener('click', e => {
+    if (e.target.closest('button')) return;
+    (e.clientX > innerWidth * 0.45 ? next : prev)();
+  });
+  const hash = parseInt(location.hash.replace('#', ''), 10);
+  if (hash >= 1 && hash <= slides.length) show(hash - 1);
+</script>
+</body>
+</html>
