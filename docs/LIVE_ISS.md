@@ -20,16 +20,34 @@ Detalles que costaron encontrar: los POST a `.txt` devuelven 400 (hay que usar G
 
 ## Canales
 
-Solo tres ítems son públicos y útiles:
+El catálogo público (`PUBLIC_SENSORS` en `iss_live.py`) cubre 12 ítems agrupados en tres
+packs que se pueden suscribir por separado:
 
-| Ítem | Canal | Estado real |
+| Pack | Canales | Ítems |
 |---|---|---|
-| `USLAB000059` | temperatura de cabina (°C) | se publica |
-| `USLAB000058` | presión de cabina (mmHg) | se publica |
-| `TIME_000001` | GMT | se publica |
+| **Atmósfera (fuego)** | temp. de cabina, presión de cabina, ppO2, ppCO2, ppN2 | `USLAB000059`, `USLAB000058`, `USLAB000053`, `USLAB000055`, `USLAB000054` |
+| **Térmico** | fluido de aviónica, fluido de refrigeración de aire, refrigerante LT y MT | `USLAB000060`, `USLAB000061`, `USLAB000056`, `USLAB000057` |
+| **Soporte vital** | depósito de orina, aguas residuales, agua limpia (Node 3) | `NODE3000005`, `NODE3000008`, `NODE3000009` |
 
-Los otros cinco canales del modelo (CO, CO2, HCN, humo, radiación) **no existen en el
-feed público**. La app lo declara en la tarjeta de cobertura y en la nota de la pestaña.
+**Derivados.** Con `ppO2` / `ppCO2` y la presión de cabina se calculan O2 en % y CO2 en ppm
+(`o2_pct_from_pp`, `co2_ppm_from_pp`): son conversiones de magnitudes medidas, no sensores,
+y la app las presenta como derivadas.
+
+Los canales que el modelo de incendio necesita y **no** existen en el feed público son CO,
+HCN, caudal de ventilación, opacidad de humo y flujo radiativo. La app lo declara en la
+tarjeta de cobertura y en la nota de la pestaña.
+
+## Opciones de prueba
+
+- **Grupo de canales** (tres packs o «Todo») y selección manual de canales: cambiar la
+  lista cierra la sesión anterior y abre una nueva con esa suscripción.
+- **Frecuencia máxima**: sin límite, 2, 1 o 0.2 Hz (`LS_requested_max_frequency`).
+- **Snapshot inicial**: pide el último valor conocido al suscribir.
+- **Probar (10 s)**: abre una sesión temporal contra NASA y devuelve, por canal, cuántos
+  frames traen número y cuántos llegan nulos. Es la forma de saber si el feed está
+  emitiendo *ahora mismo*, sin esperar a la gráfica.
+- **Diagnóstico por canal**: tabla con contadores de la sesión en curso —números, nulos,
+  último valor y hora— para distinguir «suscrito pero mudo» de «sin datos todavía».
 
 ## Datos nulos
 

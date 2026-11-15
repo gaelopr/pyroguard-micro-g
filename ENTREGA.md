@@ -63,8 +63,9 @@
 > el CO de 192 a 33 ppm: en 0 g, cerrar el aire es la maniobra de supresión más eficaz.
 >
 > La app lee además el feed público **ISSLIVE** de NASA JSC y declara en pantalla qué
-> canales publica la NASA de verdad (temperatura y presión) y cuáles no existen en
-> abierto: no rellena huecos ni presenta datos inferidos como medidos.
+> canales publica la NASA de verdad (temperatura, presión y las presiones parciales de
+> O2 y CO2, entre otros) y cuáles no existen en abierto: no rellena huecos ni presenta
+> datos inferidos como medidos.
 
 ## Texto para "¿cómo usa datos de la NASA?"
 

@@ -4,6 +4,9 @@ En modo streaming, create_session.txt abre directamente el canal de eventos:
   1. GET create_session.txt  -> CONOK,<sid>,...  (la conexión queda abierta)
   2. control.txt (conexión aparte) -> add <suscripción>
   3. los eventos llegan por la conexión del paso 1
+
+Solo se muestran como medidos los canales que el feed publica de verdad: cuando NASA
+deja de emitir, llegan frames nulos (`#`) y se cuentan como nulos, no como datos.
 """
 from __future__ import annotations
 
@@ -23,12 +26,42 @@ PATH = "/lightstreamer"
 PROTOCOL = "TLCP-2.4.0"
 CID = "mgQkwtwdysogQz2BJ4Ji-kOj2Bg"
 
-# Canales públicos reales (NASA JSC -> Lightstreamer, adapter set ISSLIVE)
-ITEMS = {
-    "USLAB000059": "cabin_temp_c",
-    "USLAB000058": "cabin_pressure_mmhg",
-    "TIME_000001": "gmt",
+# Catálogo de canales públicos reales (NASA JSC -> Lightstreamer, adapter set ISSLIVE).
+# Nombres de item tomados del diccionario de símbolos público del feed.
+PUBLIC_SENSORS = {
+    "cabin_temp_c":        ("USLAB000059", "°C",   "Temp. de cabina · US Lab"),
+    "cabin_pressure_mmhg": ("USLAB000058", "mmHg", "Presión de cabina · US Lab"),
+    "pp_o2_torr":          ("USLAB000053", "torr", "Presión parcial O2 · Lab"),
+    "pp_co2_torr":         ("USLAB000055", "torr", "Presión parcial CO2 · Lab"),
+    "pp_n2_torr":          ("USLAB000054", "torr", "Presión parcial N2 · Lab"),
+    "avionics_fluid_c":    ("USLAB000060", "°C",   "Fluido de aviónica · Lab"),
+    "air_cooling_fluid_c": ("USLAB000061", "°C",   "Fluido refrigerante de aire"),
+    "coolant_lt_kg":       ("USLAB000056", "kg",   "Refrigerante circuito LT"),
+    "coolant_mt_kg":       ("USLAB000057", "kg",   "Refrigerante circuito MT"),
+    "urine_tank_pct":      ("NODE3000005", "%",    "Depósito de orina · Node 3"),
+    "waste_water_pct":     ("NODE3000008", "%",    "Aguas residuales · Node 3"),
+    "clean_water_pct":     ("NODE3000009", "%",    "Agua limpia · Node 3"),
 }
+
+# Grupos para suscribir de una vez
+PACKS = {
+    "Atmósfera (fuego)": ["cabin_temp_c", "cabin_pressure_mmhg", "pp_o2_torr",
+                          "pp_co2_torr", "pp_n2_torr"],
+    "Térmico (refrigerantes)": ["avionics_fluid_c", "air_cooling_fluid_c",
+                                "coolant_lt_kg", "coolant_mt_kg"],
+    "Soporte vital (agua)": ["urine_tank_pct", "waste_water_pct", "clean_water_pct"],
+}
+DEFAULT_CHANNELS = PACKS["Atmósfera (fuego)"]
+
+# Canales que exige el análisis de incendio y que NO existen en el feed público
+UNAVAILABLE = [
+    ("CO", "ppm"), ("HCN", "ppm"),
+    ("Caudal de ventilación del rack", "cm/s"),
+    ("Opacidad de humo", "%/m"),
+    ("Flujo radiativo", "kW/m²"),
+]
+
+NULL = "#"
 
 
 @dataclass
@@ -45,14 +78,17 @@ class FeedStatus:
 class LightstreamerTLCP:
     def __init__(self, items: dict = None, schema: str = "value",
                  on_update: Callable | None = None, on_status: Callable | None = None,
-                 adapter_set: str = "ISSLIVE", protocol: str = PROTOCOL, debug: bool = False):
-        self.items = dict(items or ITEMS)
+                 adapter_set: str = "ISSLIVE", protocol: str = PROTOCOL, debug: bool = False,
+                 max_frequency_hz: float | None = None, snapshot: bool = True):
+        self.items = dict(items or {item: col for col, (item, _, _) in PUBLIC_SENSORS.items()})
         self.schema = schema
         self.on_update = on_update
         self.on_status = on_status
         self.adapter_set = adapter_set
         self.protocol = protocol
         self.debug = debug
+        self.max_frequency_hz = max_frequency_hz
+        self.snapshot = snapshot
         self.status = FeedStatus(items=list(self.items))
         self._session = ""
         self._stop = threading.Event()
@@ -128,9 +164,12 @@ class LightstreamerTLCP:
         deadline = time.time() + 12
         while not self._session and time.time() < deadline and not self._stop.is_set():
             time.sleep(0.2)
-        self._command({"LS_op": "add", "LS_subId": "1", "LS_mode": "MERGE",
-                       "LS_group": ",".join(self.items), "LS_schema": self.schema,
-                       "LS_snapshot": "true"})
+        payload = {"LS_op": "add", "LS_subId": "1", "LS_mode": "MERGE",
+                   "LS_group": ",".join(self.items), "LS_schema": self.schema,
+                   "LS_snapshot": "true" if self.snapshot else "false"}
+        if self.max_frequency_hz:
+            payload["LS_requested_max_frequency"] = str(self.max_frequency_hz)
+        self._command(payload)
 
     # ------------------------------------------------------------- stream
     def _run(self) -> None:
@@ -214,33 +253,25 @@ class LightstreamerTLCP:
                 pass
 
 
-# Canales realmente medidos en el feed público (NASA JSC -> Lightstreamer)
-PUBLIC_SENSORS = {
-    "cabin_temp_c": ("USLAB000059", "°C", "Temperatura de cabina US Lab"),
-    "cabin_pressure_mmhg": ("USLAB000058", "mmHg", "Presión de cabina US Lab"),
-}
-
-# Canales que exige el análisis de incendio y que NO existen en el feed público
-UNAVAILABLE = [
-    ("CO", "ppm"), ("HCN", "ppm"), ("CO2", "ppm"),
-    ("Caudal de ventilación del rack", "cm/s"),
-    ("Opacidad de humo", "%/m"),
-    ("Flujo radiativo", "kW/m²"),
-]
-
-NULL = "#"
-
-
 class LiveISS:
     """Sesión ISSLIVE + buffer de muestras reales (sin inventar canales ausentes)."""
 
-    def __init__(self, maxlen: int = 2400, debug: bool = False):
+    def __init__(self, maxlen: int = 2400, debug: bool = False,
+                 channels: list | None = None, max_frequency_hz: float | None = None,
+                 snapshot: bool = True):
+        cols = [c for c in (channels or DEFAULT_CHANNELS) if c in PUBLIC_SENSORS]
+        self.channels = cols or list(DEFAULT_CHANNELS)
         self._lock = threading.Lock()
         self._seq = 0
         self._rows: deque = deque(maxlen=maxlen)
+        self._stats = {c: {"item": PUBLIC_SENSORS[c][0], "unit": PUBLIC_SENSORS[c][1],
+                           "label": PUBLIC_SENSORS[c][2], "events": 0, "nulls": 0,
+                           "last": None, "last_utc": "", "first_utc": ""}
+                       for c in self.channels}
         self.client = LightstreamerTLCP(
-            items={item: col for col, (item, _, _) in PUBLIC_SENSORS.items()},
-            on_update=self._on_update, debug=debug)
+            items={PUBLIC_SENSORS[c][0]: c for c in self.channels},
+            on_update=self._on_update, debug=debug,
+            max_frequency_hz=max_frequency_hz, snapshot=snapshot)
 
     # ---------------------------------------------------------- ingestion
     def _on_update(self, line: str) -> None:
@@ -251,7 +282,14 @@ class LiveISS:
         # Una coma decimal europea ("23,4") añade campos: se reensambla en vez de truncar a 23.
         value = ",".join(parts[3:]) if len(parts) > 4 else parts[3]
         col = next((c for c, (i, _, _) in PUBLIC_SENSORS.items() if i == item), None)
-        if col is None or value in (NULL, "", None):
+        if col is None:
+            return
+        stamp = time.strftime("%H:%M:%SZ", time.gmtime())
+        st = self._stats.get(col)
+        if value.strip() in (NULL, "", None):
+            if st is not None:
+                st["nulls"] += 1
+                st["last_utc"] = stamp
             return
         num = str(value).replace(" ", "").replace("\u00a0", "")
         if num.count(",") == 1 and "." in num:      # 1,234.5
@@ -267,6 +305,12 @@ class LiveISS:
         with self._lock:
             self._seq += 1
             self._rows.append({"seq": self._seq, "utc": time.time(), "channel": col, "value": val})
+        if st is not None:
+            st["events"] += 1
+            st["last"] = val
+            st["last_utc"] = stamp
+            if not st["first_utc"]:
+                st["first_utc"] = stamp
 
     # ------------------------------------------------------------- reading
     def start(self) -> None:
@@ -280,25 +324,98 @@ class LiveISS:
         return self.client.status
 
     def frame(self) -> pd.DataFrame:
+        cols = list(self.channels)
         with self._lock:
             rows = list(self._rows)
         if not rows:
-            return pd.DataFrame(columns=["seq", "t", "clock", "utc", *PUBLIC_SENSORS])
+            return pd.DataFrame(columns=["seq", "t", "clock", "utc", *cols])
         df = pd.DataFrame(rows)
         wide = df.pivot_table(index="seq", columns="channel", values="value", aggfunc="last")
-        wide = wide.reindex(columns=list(PUBLIC_SENSORS)).reset_index()
+        wide = wide.reindex(columns=cols).reset_index()
         stamps = df.groupby("seq")["utc"].first().reindex(wide["seq"]).to_numpy()
         wide.insert(1, "t", (stamps - stamps.min()).round(1))
         ts = pd.to_datetime(stamps, unit="s", utc=True)
         wide.insert(2, "clock", ts.strftime("%H:%M:%S"))
         wide.insert(3, "utc", ts.strftime("%Y-%m-%dT%H:%M:%SZ"))
-        return wide
+        return self._derive(wide)
+
+    @staticmethod
+    def _derive(df: pd.DataFrame) -> pd.DataFrame:
+        """Concentraciones derivadas de presiones parciales medidas (nunca inventadas)."""
+        if "pp_o2_torr" in df.columns:
+            base = (df["cabin_pressure_mmhg"] if "cabin_pressure_mmhg" in df.columns
+                    and df["cabin_pressure_mmhg"].notna().any() else 760.0)
+            df["o2_pct_from_pp"] = (df["pp_o2_torr"] / base * 100).round(3)
+        if "pp_co2_torr" in df.columns:
+            base = (df["cabin_pressure_mmhg"] if "cabin_pressure_mmhg" in df.columns
+                    and df["cabin_pressure_mmhg"].notna().any() else 760.0)
+            df["co2_ppm_from_pp"] = (df["pp_co2_torr"] / base * 1e6).round(1)
+        return df
+
+    def diagnostics(self) -> pd.DataFrame:
+        """Contadores por canal: eventos con número, nulos y último valor."""
+        rows = []
+        for col, st in self._stats.items():
+            last = st["last"]
+            rows.append({
+                "canal": st["label"], "item": st["item"], "unidad": st["unit"],
+                "numeros": st["events"], "nulos": st["nulls"],
+                "ultimo": "" if last is None else f"{last:.2f}",
+                "hora": st["last_utc"] or "—",
+            })
+        return pd.DataFrame(rows)
 
     def coverage(self) -> dict:
         df = self.frame()
-        measured = [c for c in PUBLIC_SENSORS if c in df.columns and df[c].notna().any()]
-        return {"measured": measured, "available": len(PUBLIC_SENSORS),
+        measured = [c for c in self.channels if c in df.columns and df[c].notna().any()]
+        return {"measured": measured, "available": len(self.channels),
                 "missing_required": len(UNAVAILABLE), "samples": int(len(df))}
+
+
+def probe(channels: list | None = None, seconds: float = 10.0,
+          max_frequency_hz: float | None = None, snapshot: bool = True) -> dict:
+    """Sonda el feed durante N segundos con una sesión temporal y devuelve el recuento.
+
+    Sirve para comprobar, aquí y ahora, qué canales publican números y cuáles llegan
+    nulos: no estima nada.
+    """
+    cols = [c for c in (channels or DEFAULT_CHANNELS) if c in PUBLIC_SENSORS]
+    counts = {c: {"numeros": 0, "nulos": 0, "ultimo": None} for c in cols}
+
+    def on_update(line: str) -> None:
+        parts = line.split(",")
+        if parts[0] != "U" or len(parts) < 4:
+            return
+        item = parts[2]
+        value = ",".join(parts[3:]) if len(parts) > 4 else parts[3]
+        col = next((c for c, (i, _, _) in PUBLIC_SENSORS.items() if i == item), None)
+        if col is None or col not in counts:
+            return
+        if value.strip() in (NULL, ""):
+            counts[col]["nulos"] += 1
+            return
+        try:
+            counts[col]["ultimo"] = float(value.replace(",", "."))
+            counts[col]["numeros"] += 1
+        except ValueError:
+            counts[col]["nulos"] += 1
+
+    client = LightstreamerTLCP(items={PUBLIC_SENSORS[c][0]: c for c in cols},
+                               on_update=on_update, max_frequency_hz=max_frequency_hz,
+                               snapshot=snapshot)
+    client.start()
+    time.sleep(seconds)
+    state = client.status.state
+    items = list(client.status.items)
+    client.stop()
+    rows = []
+    for col in cols:
+        item, unit, label = PUBLIC_SENSORS[col]
+        rows.append({"canal": label, "item": item, "unidad": unit,
+                     "numeros": counts[col]["numeros"], "nulos": counts[col]["nulos"],
+                     "ultimo": "" if counts[col]["ultimo"] is None else f"{counts[col]['ultimo']:.2f}"})
+    return {"estado": state, "items": items, "segundos": seconds,
+            "canales": rows, "con_dato": sum(1 for c in rows if c["numeros"] > 0)}
 
 
 if __name__ == "__main__":

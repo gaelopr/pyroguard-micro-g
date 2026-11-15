@@ -212,6 +212,15 @@ header[data-testid="stHeader"], div[data-testid="stToolbar"] { background:transp
 [data-testid="stMarkdownContainer"] h3, [data-testid="stMarkdownContainer"] h4,
 [data-testid="stMarkdownContainer"] h5, [data-testid="stMarkdownContainer"] h6 {
   color:var(--head) !important; }
+.pg-tblwrap { overflow-x:auto; border:1px solid var(--line); border-radius:10px; margin-top:6px; }
+.pg-tbl { width:100%; border-collapse:collapse; font-family:'Share Tech Mono',monospace; font-size:11.5px; }
+.pg-tbl thead th { text-align:left; padding:7px 10px; background:var(--panel2); color:var(--dim2);
+  font-weight:400; letter-spacing:.1em; text-transform:uppercase; font-size:9.5px;
+  border-bottom:1px solid var(--line); white-space:nowrap; }
+.pg-tbl tbody td { padding:6px 10px; color:var(--ink); border-bottom:1px solid var(--line);
+  white-space:nowrap; }
+.pg-tbl tbody tr:last-child td { border-bottom:none; }
+.pg-tbl tbody tr:hover td { background:var(--hover); }
 .pg-h3 { font-family:'Share Tech Mono',monospace; font-size:19px; color:var(--head);
   letter-spacing:.03em; line-height:1.3; margin:0 0 6px; }
 .pg-p { font-size:13.5px; color:var(--ink); line-height:1.6; margin-bottom:10px; }
@@ -396,18 +405,98 @@ def _infer_panel(df_live: pd.DataFrame):
     return sim, esc
 
 
+DERIVED = {
+    "o2_pct_from_pp": ("O2 derivado de ppO2", "%"),
+    "co2_ppm_from_pp": ("CO2 derivado de ppCO2", "ppm"),
+}
+
+SHORT = {
+    "cabin_temp_c": "Temp cabina", "cabin_pressure_mmhg": "Presión",
+    "pp_o2_torr": "ppO2", "pp_co2_torr": "ppCO2", "pp_n2_torr": "ppN2",
+    "avionics_fluid_c": "Fluido aviónica", "air_cooling_fluid_c": "Fluido aire",
+    "coolant_lt_kg": "Refrig. LT", "coolant_mt_kg": "Refrig. MT",
+    "urine_tank_pct": "Orina N3", "waste_water_pct": "Agua residual",
+    "clean_water_pct": "Agua limpia",
+}
+
+
+def _var_meta(col: str) -> tuple[str, str]:
+    if col in iss_live.PUBLIC_SENSORS:
+        _, unit, label = iss_live.PUBLIC_SENSORS[col]
+        return label, unit
+    return DERIVED.get(col, (col, ""))
+
+
+def _tbl(df: pd.DataFrame) -> None:
+    head = "".join(f"<th>{html.escape(str(c))}</th>" for c in df.columns)
+    body = "".join("<tr>" + "".join(f"<td>{html.escape(str(v))}</td>" for v in row) + "</tr>"
+                   for row in df.itertuples(index=False))
+    st.markdown(f'<div class="pg-tblwrap"><table class="pg-tbl"><thead><tr>{head}</tr></thead>'
+                f'<tbody>{body}</tbody></table></div>', unsafe_allow_html=True)
+
+
 @st.cache_resource(show_spinner=False)
-def _shared_feed() -> "iss_live.LiveISS":
-    """Una sola sesión TLCP por servidor: recargar la página no abre otra contra NASA."""
-    return iss_live.LiveISS()
+def _shared_feed(channels: tuple, freq: float | None, snap: bool) -> "iss_live.LiveISS":
+    """Una sesión TLCP por configuración: recargar no abre otra contra NASA."""
+    return iss_live.LiveISS(channels=list(channels), max_frequency_hz=freq, snapshot=snap)
 
 
 def render_live_mode() -> None:
-    feed = _shared_feed()
+    st.markdown("#### Live ISS Telemetry · NASA JSC → Lightstreamer")
+    st.caption("Telemetría pública real del feed de la NASA. Solo se pinta lo que llega: cuando "
+               "NASA corta la emisión los frames vienen nulos y la app lo declara, no rellena huecos.")
+
+    with st.expander("Canales y opciones de prueba", expanded=True):
+        pack = st.radio("Grupo de canales", [*iss_live.PACKS, "Todo"], horizontal=True,
+                        help="Grupos del diccionario público del feed. «Todo» suscribe los 12 canales.")
+        default = (list(iss_live.PUBLIC_SENSORS) if pack == "Todo"
+                   else iss_live.PACKS.get(pack, iss_live.DEFAULT_CHANNELS))
+        canales = st.multiselect(
+            "Canales a suscribir", options=list(iss_live.PUBLIC_SENSORS), default=default,
+            format_func=lambda c: iss_live.PUBLIC_SENSORS[c][2],
+            help="Cada canal es un item del feed público. Cambiar la lista abre una sesión nueva.")
+        c1, c2, c3 = st.columns([1.3, 1, 1.2])
+        freq_lbl = c1.selectbox("Frecuencia máxima", ["Sin límite", "2 Hz", "1 Hz", "0.2 Hz"],
+                                index=0, help="Throttle que se pide al servidor "
+                                              "(LS_requested_max_frequency).")
+        freq = {"Sin límite": None, "2 Hz": 2.0, "1 Hz": 1.0, "0.2 Hz": 0.2}[freq_lbl]
+        snap = c2.toggle("Snapshot", value=True,
+                         help="Pide el último valor conocido en el momento de suscribir.")
+        probar = c3.button("🔎 Probar", width="stretch", disabled=not canales,
+                           help="Abre una sesión temporal contra NASA y cuenta valores y nulos "
+                                "por canal. No estima nada.")
+        if probar:
+            with st.spinner("Sondeando el feed durante 10 s…"):
+                st.session_state["probe_res"] = iss_live.probe(canales, 10.0, freq, snap)
+
+    if not canales:
+        st.warning("Selecciona al menos un canal para abrir la sesión.")
+        return
+
+    key = (tuple(canales), freq, snap)
+    prev_key = st.session_state.get("live_key")
+    if prev_key is not None and prev_key != key:
+        try:
+            _shared_feed(*prev_key).stop()
+        except Exception:  # noqa: BLE001
+            pass
+    st.session_state["live_key"] = key
+    feed = _shared_feed(*key)
+
+    res = st.session_state.get("probe_res")
+    if res:
+        head = (f"**Sondeo del feed**: {res['con_dato']} de {len(res['canales'])} canales devolvieron "
+                f"números en {res['segundos']:.0f} s · estado `{res['estado']}`.")
+        (st.success if res["con_dato"] else st.warning)(head)
+        _tbl(pd.DataFrame(res["canales"]))
+        if res["con_dato"]:
+            st.caption("Hay emisión en este momento: esos canales son los que verás graficarse abajo.")
+        else:
+            st.caption("El servidor acepta la suscripción pero NASA no está publicando valores ahora "
+                       "mismo (frames `#`). Reintenta más tarde o usa el simulador.")
+
     stt = feed.status
     live_now = stt.state in ("connecting", "streaming")
-
-    st.markdown("#### Live ISS Telemetry · NASA JSC → Lightstreamer")
     b1, b2 = st.columns([1.6, 1.6])
     with b1:
         if st.button("Conectar feed", disabled=live_now, width="stretch"):
@@ -432,13 +521,13 @@ def render_live_mode() -> None:
             unsafe_allow_html=True)
 
         chips = []
-        for col, (item, unit, label) in iss_live.PUBLIC_SENSORS.items():
+        for col in feed.channels:
+            _, unit, _label = iss_live.PUBLIC_SENSORS[col]
             if not df_live.empty and col in df_live.columns and df_live[col].notna().any():
-                val, faded = f"{df_live[col].dropna().iloc[-1]:.2f}", ""
+                val, tone = f"{df_live[col].dropna().iloc[-1]:.2f}", ""
             else:
-                val, faded = "—", "pg-pre"
-            chips.append((label.replace("Temperatura de cabina ", "Temp ").replace("Presión de cabina ", "Presión "),
-                          val, unit, faded))
+                val, tone = "—", "pg-pre"
+            chips.append((SHORT.get(col, col), val, unit, tone))
         chips += [("Muestras reales", f"{cov['samples']}", "", ""),
                   ("Actualizaciones", f"{s.updates}", "", "")]
         st.markdown(
@@ -447,43 +536,59 @@ def render_live_mode() -> None:
                 f'<span class="pg-chip-v {tone}">{val}<i>{unit}</i></span></div>'
                 for lab, val, unit, tone in chips) + "</div>", unsafe_allow_html=True)
 
-        if df_live.empty:
+        medidos = [c for c in df_live.columns
+                   if c not in ("seq", "t", "clock", "utc") and df_live[c].notna().any()]
+        if df_live.empty or not medidos:
             if s.state == "idle":
-                st.info("Pulsa **Conectar feed** para abrir la sesión TLCP contra el servidor de NASA y "
-                        "suscribir los canales de cabina del US Lab.")
+                st.info("Pulsa **Conectar feed** para abrir la sesión TLCP contra el servidor de NASA "
+                        "y suscribir los canales elegidos.")
             elif s.state == "connecting":
-                st.info("Abriendo sesión TLCP y suscribiendo canales del US Lab…")
+                st.info("Abriendo sesión TLCP y suscribiendo canales…")
             else:
-                st.warning("Enlace abierto y suscripción aceptada, pero NASA no está publicando valores para "
-                           "estos canales (llegan frames nulos `#`). No se inventa ninguna cifra: la pestaña "
-                           "queda a la espera y reintenta sola.")
+                st.warning("Enlace abierto y suscripción aceptada, pero NASA no está publicando valores "
+                           "para estos canales (llegan frames nulos `#`). No se inventa ninguna cifra: "
+                           "la pestaña queda a la espera y reintenta sola. Usa **Probar** para "
+                           "confirmar qué devuelve el feed ahora mismo.")
         else:
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-            if "cabin_temp_c" in df_live.columns:
-                fig.add_trace(go.Scatter(x=df_live.t, y=df_live.cabin_temp_c, name="temp_c (°C)",
-                                         mode="lines+markers", line=dict(color=ORANGE, width=2)))
-            if "cabin_pressure_mmhg" in df_live.columns:
-                fig.add_trace(go.Scatter(x=df_live.t, y=df_live.cabin_pressure_mmhg,
-                                         name="presión (mmHg)", mode="lines+markers",
-                                         line=dict(color=CYAN, width=1.6)), secondary_y=True)
-            fig.update_layout(**PLOT, height=330,
-                              margin=dict(l=60, r=60, t=60, b=36),
-                              legend=dict(orientation="h", yanchor="bottom", y=1.06, x=0, font=dict(size=9.5, color=T["ink"])),
+            vc1, vc2 = st.columns([2, 1.2])
+            var = vc1.selectbox("Variable a representar", medidos,
+                                format_func=lambda c: _var_meta(c)[0], key="live_var")
+            vc2.caption(f"{len(medidos)} de {cov['available']} canales suscritos con datos "
+                        f"· {cov['samples']} muestras")
+            label, unit = _var_meta(var)
+            fig = go.Figure(go.Scatter(x=df_live.t, y=df_live[var], name=label,
+                                       mode="lines+markers",
+                                       line=dict(color=ORANGE, width=2), marker=dict(size=4)))
+            fig.update_layout(**PLOT, height=320, margin=dict(l=64, r=40, t=46, b=38),
                               font=dict(family="Consolas, monospace", size=11, color=T["ink"]),
-                              hovermode="x unified")
-            fig.update_xaxes(title_text="segundos desde la primera muestra",
-                             gridcolor=T["hair"], tickfont=dict(color=T["ink"]),
-                             title_font=dict(color=T["dim"]))
-            fig.update_yaxes(gridcolor=T["hair"], tickfont=dict(color=T["ink"]),
+                              hovermode="x unified", showlegend=False,
+                              title=dict(text=f"{label} ({unit})", x=0.01, xanchor="left",
+                                         font=dict(size=12, color=T["dim"])))
+            fig.update_xaxes(title_text="segundos desde la primera muestra", gridcolor=T["hair"],
+                             tickfont=dict(color=T["ink"]), title_font=dict(color=T["dim"]))
+            fig.update_yaxes(title_text=unit, gridcolor=T["hair"], tickfont=dict(color=T["ink"]),
                              title_font=dict(color=T["dim"]))
             st.plotly_chart(fig, config=PCFG, width="stretch")
 
+        with st.expander("Diagnóstico por canal · qué llega y qué no", expanded=df_live.empty):
+            _tbl(feed.diagnostics())
+            st.caption("«Numeros» = frames con valor; «nulos» = frames `#`. Un canal con muchos nulos "
+                       "y cero números está suscrito pero sin emisión.")
+            if df_live.empty or not any(
+                    df_live[c].notna().any() for c in df_live.columns
+                    if c not in ("seq", "t", "clock", "utc")):
+                st.caption("Ningún canal tiene datos todavía: el gráfico aparece en cuanto llegue el "
+                           "primer valor numérico.")
+
+        medidos_n = len(cov["measured"])
         st.markdown(
             '<div class="pg-card" style="margin-top:10px">'
-            '<div class="pg-kpi-label">Cobertura de canales · qué es real y qué no</div>'
+            '<div class="pg-kpi-label">Cobertura · qué es real y qué no</div>'
             f'<div style="margin-top:8px;font-size:12.5px;line-height:1.7">'
-            f'<b style="color:{GREEN}">Medidos por el feed:</b> temperatura y presión de cabina del US Lab '
-            f'({cov["available"]} de 8 canales del modelo).<br>'
+            f'<b style="color:{GREEN}">Canales públicos suscritos:</b> {cov["available"]} '
+            f'({medidos_n} con datos en esta sesión).<br>'
+            f'<b style="color:{CYAN}">Derivados de lo medido:</b> O2 en % y CO2 en ppm, calculados desde '
+            f'las presiones parciales y la presión de cabina (no son sensores directos).<br>'
             f'<b style="color:{RED}">Sin sensor público:</b> '
             + " · ".join(f"{n} ({u})" for n, u in iss_live.UNAVAILABLE) +
             '</div></div>', unsafe_allow_html=True)

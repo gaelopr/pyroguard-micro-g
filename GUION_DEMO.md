@@ -74,7 +74,7 @@ Si preguntan por la curva: IsolationForest sobre tasas suavizadas + MIRI determi
 
 **Clic:** modo **Live ISS (NASA · Lightstreamer)**.
 
-> "Esto es el feed público real de la estación, sin credenciales. Y aquí está lo que casi nadie hace: de los 8 canales que necesita el modelo, la NASA solo publica temperatura y presión de cabina. No hay CO, ni humo, ni radiación en abierto. Por eso la app **no puntúa MIRI sobre esto**: declara la cobertura, dice qué falta y no inventa ninguna cifra."
+> "Esto es el feed público real de la estación, sin credenciales. Y aquí está lo que casi nadie hace: de los 8 canales que necesita el modelo, la NASA publica temperatura, presión y las presiones parciales de O2 y CO2 —de ahí salen el O2 en % y el CO2 en ppm—. El resto, CO, humo y radiación, no existe en abierto. Por eso la app **no puntúa MIRI sobre esto**: declara la cobertura, dice qué falta y no inventa ninguna cifra."
 
 Si hay datos: señalar las muestras reales y la hora UTC.
 Si no hay: "el enlace está abierto y suscrito, pero NASA no está publicando valores; la app lo dice en vez de rellenar el hueco."

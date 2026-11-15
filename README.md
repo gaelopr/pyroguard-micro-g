@@ -81,9 +81,10 @@ que se probaron, no a las únicas compatibles.
 | Canales ausentes en Live | `physics_simulator` | inferido (trazo discontinuo) |
 | CSV subido | tu fichero, normalizado | informe de mapeo |
 
-El feed público solo publica temperatura y presión de cabina del US Lab. No hay CO,
-CO2, HCN, humo ni radiación en abierto: la app **no puntúa MIRI sobre datos reales**
-y lo dice en pantalla en lugar de rellenar los huecos.
+El feed público expone 12 canales (atmósfera, térmico y soporte vital), entre ellos las
+presiones parciales de O2 y CO2, de las que se derivan O2 en % y CO2 en ppm. No hay CO,
+HCN, caudal de ventilación, humo ni radiación en abierto: la app **no puntúa MIRI sobre
+datos reales** y lo dice en pantalla en lugar de rellenar los huecos.
 
 ## Datos de la NASA utilizados
 
