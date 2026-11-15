@@ -66,7 +66,7 @@ Si preguntan por la curva: IsolationForest sobre tasas suavizadas + MIRI determi
 
 **Clic:** sidebar → *Selector de atmósfera* → **Lunar Gateway / Artemis (34.0 % O2 | 8.2 psi)**, escenario Saffire, **Corte de ventilación = 220 s**.
 
-> "Misma quema, pero a 34 % de oxígeno y 56 kPa: la inflamabilidad y la propagación cambian ×1,65. Y ahora el corte de ventilación en el segundo 220. El CO cae de 192 a **33 ppm**, la radiación de 4,5 a **3,6**, la temperatura a 25 °C y el caudal termina en 0,3 cm/s. Sin convección forzada, la llama se sofoca en sus propios productos. **En microgravedad el mejor extintor es cerrar el aire** — y la app te enseña el porqué en la misma pantalla."
+> "Misma quema, pero a 34 % de oxígeno y 56 kPa: la inflamabilidad y la propagación cambian ×1,65. Y ahora el corte de ventilación en el segundo 220. El CO cae de 316 a **54 ppm**, la radiación de 7,4 a **3,6**, la temperatura a 25 °C y el caudal termina en 0,3 cm/s. Sin convección forzada, la llama se sofoca en sus propios productos. **En microgravedad el mejor extintor es cerrar el aire** — y la app te enseña el porqué en la misma pantalla."
 
 ---
 
@@ -107,7 +107,7 @@ Opcional (10 s): activar **Completar canales ausentes con el modelo físico** �
 | Smoldering | 59,1 % | 26,7 °C | 88 ppm | HCN 12,4 · tradicional CIEGO |
 | Saffire | 98,0 % | 30,8 °C | 192 ppm | IA 180 s vs 503 s → **+323 s** |
 | Cool Flame | 50,1 % | 23,4 °C | 60 ppm | humo 0,21 · PRE-IGNICIÓN |
-| AEA + corte 220 s | — | 25,3 °C | 33 ppm | rad 4,51 → 3,60 |
+| AEA + corte 220 s | — | 25,3 °C | 54 ppm | rad 7,42 → 3,60 |
 | CSV demo | 65,5 % | 49,9 °C | 175 ppm | IA 111 s vs 183 s → **+72 s** |
 
 ## Plan B

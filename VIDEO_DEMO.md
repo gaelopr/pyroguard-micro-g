@@ -1,4 +1,11 @@
-# Vídeo demo · 3 minutos
+# Vídeo demo
+
+> **El formulario de Space Apps pide 30 segundos o menos** (o 7 diapositivas). La versión de
+> 3 minutos sirve para la presentación en vivo; para el enlace del formulario usa la de 30 s
+> que está al final de este documento, y súbela a YouTube como «público» o «no listado»
+> (no listado también vale: no pide contraseña ni permiso).
+
+## Vídeo demo · 3 minutos
 
 Guion para grabar hoy. **332 palabras de voz** ≈ 2:20 a ritmo normal (medido); con las
 pausas y las transiciones de pantalla llega a **2:55–3:00**. Grábalo en **6 tomas separadas** y
@@ -60,7 +67,7 @@ Luego tab **DETECCIÓN**.
 *Acción:* tab **RESPUESTA**; después, escenario Saffire con **corte de ventilación = 220**.
 
 > "Y no solo dice qué pasa: dice qué hacer, en orden. Cortar la ventilación es la acción
-> número uno. Se puede probar: con corte en el segundo 220, el CO baja de 192 a 33 ppm.
+> número uno. Se puede probar: con corte en el segundo 220, el CO baja de 192 a 34 ppm.
 > En microgravedad, cerrar el aire es el mejor extintor."
 
 ### Toma 6 · Honestidad y cierre (2:35 – 3:00)
@@ -83,10 +90,27 @@ y debajo, en pequeño: `NASA Space Apps Challenge 2026`.
 - Nunca muestres la terminal ni el panel de Streamlit.
 - Movimientos de ratón **lentos y en línea recta**; una pausa de medio segundo después de cada clic.
 - Si te trabas en una frase, no reinicies: corta y empalma.
-- Subtítulos quemados con las cifras clave: `+323 s`, `98 %`, `CO 192 → 33 ppm`. Muchos jurados ven el vídeo sin sonido.
+- Subtítulos quemados con las cifras clave: `+323 s`, `98 %`, `180/180 detecciones`. Muchos jurados ven el vídeo sin sonido.
 
 ## Exportación
 
 MP4 · H.264 · 1080p · audio AAC 128 kbps. Nombra el archivo `pyroguard_demo.mp4`.
+
+## Versión de 30 s (la que va en el formulario)
+
+**65 palabras ≈ 25 s.** Cinco cortes, sin fundidos, subtítulos quemados con las cifras.
+
+| # | Plano | Acción | Voz |
+|---|---|---|---|
+| 1 | Cabecera, cursor en t=0 | Nada | «En la ISS no hay convección: un cable que arde no calienta el techo y el detector de humo llega tarde.» |
+| 2 | Hero en t=0 | Nada | «PyroGuard Micro-G puntúa cada segundo la química del aire —CO, CO₂, HCN, radiación— y avisa 325 segundos antes que el detector clásico.» |
+| 3 | Pestaña DETECCIÓN | Clic en **Pico MIRI** | «El clásico marca 503 s. El modelo, 180.» |
+| 4 | Fila de escenarios | Cambio a **Pirólisis** | «Aquí el clásico es ciego y el modelo avisa.» |
+| 5 | Modo **Histórico NASA** | Un clic en Descargar | «Todo con datos públicos de la NASA, local y sin API keys.» |
+
+**Cierre (0:26 – 0:30):** pantalla completa del veredicto con `PyroGuard Micro-G` +
+`github.com/gaelopr/pyroguard-micro-g` y, debajo, `NASA Space Apps Challenge 2026`.
+
+Grabarlo en 3 pasadas (planos 1-2, 3-4, 5) y unir: 20 minutos en total.
 Súbelo a YouTube como **"no listado"** y pega el enlace en el formulario: es lo que menos
 falla y lo que el jurado espera encontrar.

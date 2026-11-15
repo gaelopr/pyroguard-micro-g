@@ -74,8 +74,10 @@ pot_eff(t ≥ t_c) = pot_eff(t_c) · exp(−(t − t_c)/75)
 ```
 
 La ventilación muere en decenas de segundos; la combustión se apaga mucho más despacio
-porque pasa a estar limitada por difusión. Resultado en el escenario 3 con corte a
-220 s: CO 192 → 33 ppm, radiación 4,51 → 3,60 kW/m², temperatura 25,3 °C.
+porque pasa a estar limitada por difusión. Resultado en el escenario 3 **en ISS** con corte
+a 220 s: CO 192 → 34 ppm, radiación 4,51 → 2,19 kW/m², temperatura 30,8 → 24,3 °C. En
+atmósfera AEA (×1,65) el mismo corte lleva el CO de 316 a 54 ppm y la radiación de 7,42 a
+3,60 kW/m².
 **En 0 g, cerrar el aire es la maniobra de supresión más eficaz.**
 
 ## Qué NO modela

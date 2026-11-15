@@ -126,7 +126,7 @@ El `demo_saffire_sintetico.csv` es sintético y su nombre lo dice.
 | Pirólisis de cableado | 59,1 % | 26,7 °C | 88 ppm | HCN 12,4 ppm · detector tradicional ciego |
 | Propagación por ventilación | 98,0 % | 30,8 °C | 192 ppm | IA 180 s vs tradicional 503 s → **+323 s** |
 | Llama fría | 50,1 % | 23,4 °C | 60 ppm | PRE-IGNICIÓN, humo 0,21 %/m |
-| Artemis + corte a 220 s | — | 25,3 °C | 54 ppm | CO 192 → 54 ppm, radiación 4,51 → 3,60 kW/m² |
+| Artemis + corte a 220 s | — | 25,3 °C | 54 ppm | CO 316 → 54 ppm, radiación 7,42 → 3,60 kW/m² |
 
 La tabla son los **picos** de cada escenario. En la app el veredicto de la cabecera se calcula con
 las muestras **hasta el cursor** —en t = 0 dice NOMINAL aunque el dataset acabe en CRÍTICO— y solo
@@ -191,8 +191,25 @@ docs/                  Documentación: persona, diseño, arquitectura, física, 
 - [Modo LIVE: qué publica la NASA de verdad](docs/LIVE_ISS.md)
 - [Validación del detector](docs/VALIDACION.md) — protocolo, tabla de resultados y qué no demuestra
 
+## Uso de herramientas de IA (Super Intelligence)
+
+Declaración exigida por el reglamento del NASA Space Apps Challenge:
+
+- **Código y documentación**: escritos con asistencia de IA (agente de código Codebuff).
+  Todo el código generado pasa por la suite de tests, por el protocolo de validación y por
+  revisión manual; ninguna cifra de la interfaz se afirma sin un cálculo que la respalde.
+- **Imágenes, audio y vídeo**: ninguno generado por IA. La interfaz es CSS y SVG escritos a
+  mano y las capturas son de la app real. Si el vídeo de entrega usa voz sintética, hay que
+  declararlo en su descripción y metadatos.
+- **Datos**: no se usa IA generativa para producir telemetría. El CSV de demostración es
+  sintético, lo dice su nombre y lo declara la app.
+
 ## Límites conocidos
 
+- **No es un sistema certificado para vuelo.** Es un prototipo de apoyo a la decisión: no
+  sustituye a los detectores certificados ni a las Flight Rules de la estación, y no ha
+  pasado un proceso de certificación de software espacial (FMEA, DO-178, revisión de
+  seguridad de vuelo).
 - MIRI es un índice compuesto ponderado, determinista y auditable, **no** un modelo
   validado en vuelo.
 - La telemetría de los escenarios es simulación física, no datos de misión.

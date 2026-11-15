@@ -29,7 +29,10 @@
 | Título | **PyroGuard Micro-G** |
 | Enlace al proyecto | la URL de la app |
 | Repositorio | la URL del repo |
-| Vídeo / demo | grábalo con [VIDEO_DEMO.md](VIDEO_DEMO.md): 6 tomas, 365 palabras de voz, 3 min |
+| Demo para el formulario | **30 s** con el guion corto de [VIDEO_DEMO.md](VIDEO_DEMO.md); súbelo a YouTube (público o no listado) y pega la URL completa |
+| Vídeo de presentación | 3 min con el guion largo de [VIDEO_DEMO.md](VIDEO_DEMO.md): 332 palabras, 6 tomas |
+| Uso de SI | marcar *Writing/Editing/Translation*, *Coding/Debugging/Troubleshooting* y *Research/Information Gathering*; la declaración está en el README, sección «Uso de herramientas de IA» |
+| Datos de la NASA | ISSLIVE (Lightstreamer) y las tres investigaciones de PSI (Saffire I/II/III), con URL completa |
 | Evidencia de participación del sábado | *(tu parte: fotos, capturas o el registro del equipo)* |
 
 ## Texto corto (para "descripción" o "resumen")
@@ -60,7 +63,7 @@
 > propagación tipo Saffire, el modelo avisa en el segundo 180 y el convencional en el
 > 503. En pirólisis de cableado y en llama fría el detector convencional **nunca**
 > avisa, porque la temperatura no sube. El corte de ventilación en el segundo 220 baja
-> el CO de 192 a 33 ppm: en 0 g, cerrar el aire es la maniobra de supresión más eficaz.
+> el CO de 192 a 34 ppm: en 0 g, cerrar el aire es la maniobra de supresión más eficaz.
 >
 > La app lee además el feed público **ISSLIVE** de NASA JSC y declara en pantalla qué
 > canales publica la NASA de verdad (temperatura, presión y las presiones parciales de
