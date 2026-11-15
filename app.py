@@ -159,6 +159,8 @@ div[data-testid="stMetric"] { border:1px solid var(--line); border-radius:10px;
   padding:9px 12px; background:var(--panel2); }
 div[data-testid="stMetricValue"] { font-family:'Share Tech Mono',monospace; color:var(--head) !important;
   font-size:19px; }
+[data-testid="stMetricDelta"] { background:transparent !important; color:var(--green) !important; }
+[data-testid="stMetricDelta"] svg { fill:var(--green) !important; }
 div[data-testid="stMetricLabel"] p { font-size:10px !important; letter-spacing:.1em; text-transform:uppercase;
   color:var(--dim2) !important; }
 [data-testid="stAlertContainer"] { background:var(--panel2) !important; }
@@ -181,6 +183,11 @@ div[data-baseweb="popover"] div[role="listbox"], div[data-baseweb="popover"] ul 
 div[data-baseweb="popover"] li, div[data-baseweb="popover"] div[role="option"] { color:var(--ink) !important; }
 div[data-baseweb="popover"] li:hover, div[data-baseweb="popover"] div[role="option"]:hover { background-color:var(--hover) !important; }
 [data-testid="stFileUploader"] section { background:var(--panel2); border-color:var(--line2); }
+[data-testid="stFileChip"] { background:var(--panel2) !important; border:1px solid var(--line2) !important; }
+[data-testid="stFileChip"] *, [data-testid="stFileChipName"] { color:var(--ink) !important; }
+[data-testid="stFileChip"] svg { fill:var(--ink) !important; }
+[data-testid="stCodeBlock"], [data-testid="stMarkdownContainer"] code {
+  background:var(--panel2) !important; color:var(--head) !important; border-color:var(--line2) !important; }
 [data-testid="stFileUploader"] section small, [data-testid="stFileUploader"] section span { color:var(--dim); }
 [data-testid="stExpander"] details { background:var(--panel2); border-color:var(--line2); }
 [data-testid="stExpander"] summary { color:var(--head); }
@@ -198,6 +205,16 @@ header[data-testid="stHeader"], div[data-testid="stToolbar"] { background:transp
 [data-testid="stAlertContentWarning"], [data-testid="stAlertContentError"] {
   background:transparent !important; color:var(--ink) !important; }
 [data-testid="stAlert"] svg { fill:currentColor !important; }
+[data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] li,
+[data-testid="stMarkdownContainer"] strong, [data-testid="stMarkdownContainer"] em,
+[data-testid="stMarkdownContainer"] code { color:var(--ink) !important; }
+[data-testid="stMarkdownContainer"] h1, [data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3, [data-testid="stMarkdownContainer"] h4,
+[data-testid="stMarkdownContainer"] h5, [data-testid="stMarkdownContainer"] h6 {
+  color:var(--head) !important; }
+.pg-h3 { font-family:'Share Tech Mono',monospace; font-size:19px; color:var(--head);
+  letter-spacing:.03em; line-height:1.3; margin:0 0 6px; }
+.pg-p { font-size:13.5px; color:var(--ink); line-height:1.6; margin-bottom:10px; }
 div[data-testid="stDownloadButton"] button {
   background:var(--btn) !important; color:var(--btnink) !important; border-color:var(--line2) !important; }
 """
@@ -736,12 +753,14 @@ def live_panel():
                                 margin=dict(l=18, r=18, t=34, b=8),
                                 font=dict(family="Consolas, monospace", color=T["ink"]))
             st.plotly_chart(gauge, config={"displayModeBar": False}, width="stretch")
+            trad_txt_b = (f"{bench['tradicional_seg']} s" if bench["tradicional_seg"] is not None
+                          else "NUNCA")
             st.markdown(f"""
 <div class="pg-card">
   <div class="pg-kpi-label">Benchmark de ventaja temporal</div>
   <div style="margin-top:8px;font-size:12.5px;line-height:1.9">
     PyroGuard AI: <b style="color:{GREEN}">{bench['pyroguard_seg'] if bench['pyroguard_seg'] is not None else '—'} s</b><br>
-    Detector terrestre: <b style="color:{RED}">{bench['tradicional_seg'] if bench['tradicional_seg'] is not None else 'NUNCA'} s</b><br>
+    Detector terrestre: <b style="color:{RED}">{trad_txt_b}</b><br>
     <b class="{'pg-nom' if (bench['ventaja_seg'] or 0) > 0 else 'pg-crit'}">{bench['veredicto']}</b>
   </div>
 </div>""", unsafe_allow_html=True)
@@ -751,11 +770,12 @@ def live_panel():
     with tab3:
         h1, h2 = st.columns([1.1, 1])
         with h1:
-            st.markdown(f"### Clasificación: <span class='{cls}'>{proto['tipo_combustion']}</span>",
-                        unsafe_allow_html=True)
-            st.markdown(f"**Nivel de amenaza:** <span class='{cls}'>{nivel}</span> · **Tiempo crítico:** "
-                        f"{proto['tiempo_critico_seg'] if proto['tiempo_critico_seg'] is not None else 'no proyectado'} s "
-                        f"(IDLH CO 1200 ppm / HCN 50 ppm)", unsafe_allow_html=True)
+            st.markdown(f'<div class="pg-h3">Clasificación: <span class="{cls}">'
+                        f'{proto["tipo_combustion"]}</span></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pg-p">Nivel de amenaza: <span class="{cls}">{nivel}</span> · '
+                        f'Tiempo crítico: '
+                        f'{proto["tiempo_critico_seg"] if proto["tiempo_critico_seg"] is not None else "no proyectado"} s '
+                        f'(IDLH CO 1200 ppm / HCN 50 ppm)</div>', unsafe_allow_html=True)
             st.markdown("#### Acciones inmediatas (Flight Rules)")
             for a in proto["acciones_inmediatas"]:
                 st.markdown(f'<div class="pg-step">{a}</div>', unsafe_allow_html=True)
