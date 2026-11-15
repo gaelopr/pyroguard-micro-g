@@ -20,7 +20,7 @@ pausas y las transiciones de pantalla llega a **2:55–3:00**. Grábalo en **6 t
 - [ ] Graba la voz **por separado** (después, sobre la imagen): si te trabas, repites solo el audio.
 - [ ] Ten a mano `demo_saffire_sintetico.csv` para la toma 6.
 
-> Graba sobre la **app desplegada** (`pyroguard-micro-g.streamlit.app`) para que el vídeo
+> Graba sobre la **app desplegada** (`pyroguardmicrog.streamlit.app`) para que el vídeo
 > coincida con lo que el jurado abrirá. Si va con retardo, usa la local: la interfaz es idéntica.
 
 ## Tomas

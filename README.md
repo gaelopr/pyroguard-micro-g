@@ -1,11 +1,11 @@
 # PyroGuard Micro-G
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://pyroguard-micro-g.streamlit.app)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://pyroguardmicrog.streamlit.app)
 [![tests](https://github.com/gaelopr/pyroguard-micro-g/actions/workflows/tests.yml/badge.svg)](https://github.com/gaelopr/pyroguard-micro-g/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 
-### ▶️ [pyroguard-micro-g.streamlit.app](https://pyroguard-micro-g.streamlit.app)
+### ▶️ [pyroguardmicrog.streamlit.app](https://pyroguardmicrog.streamlit.app)
 
 **Detección temprana de incendio en microgravedad con telemetría química.**
 Prototipo de análisis y alerta para un rack del US Lab de la ISS: demuestra por qué

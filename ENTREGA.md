@@ -3,25 +3,15 @@
 > Todo lo que hay que comprobar y pegar antes del **domingo a las 23:59**.
 > Cada cosa está verificada salvo lo marcado como *tu parte*.
 
-## Paso 0 · Renombrar el subdominio (2 min, hazlo primero)
-
-La app se desplegó como `pyrogaurdmicrog` (con errata) y la documentación ya apunta a
-`pyroguard-micro-g`. Streamlit **no redirige** la URL vieja, así que el renombrado tiene
-que hacerse antes de enviar o los enlaces de la entrega darán 404.
-
-1. Entra en <https://share.streamlit.io> → tu app → menú **⋮** → **Settings**.
-2. Pestaña **General** → **Custom subdomain** → escribe `pyroguard-micro-g` → **Save**.
-   (Mínimo 6 caracteres; ya está comprobado que ese subdominio está libre.)
-3. La app se redespliega sola. Verifica en incógnito:
-   <https://pyroguard-micro-g.streamlit.app> debe abrir el veredicto.
-4. Si no puedes renombrar, **revierte las 4 apariciones** de la URL nueva (README ×2,
-   ENTREGA, VIDEO_DEMO) y envía con la vieja: es fea, pero funciona.
+> **Enlace verificado:** <https://pyroguardmicrog.streamlit.app> abre la app sin registro
+> (comprobado en ventana de incógnito, sirviendo el veredicto por cursor). El subdominio
+> viejo con errata ya no existe, así que no compartas enlaces guardados de antes.
 
 ## Enlaces
 
 | Qué | Enlace |
 |---|---|
-| **App en vivo** | https://pyroguard-micro-g.streamlit.app |
+| **App en vivo** | https://pyroguardmicrog.streamlit.app |
 | **Repositorio** | https://github.com/gaelopr/pyroguard-micro-g |
 | Guion de 5 min | [GUION_DEMO.md](GUION_DEMO.md) |
 | Wireframe | [docs/img/wireframe.png](docs/img/wireframe.png) · [versión navegable](docs/wireframe.html) |
@@ -125,7 +115,7 @@ que hacerse antes de enviar o los enlaces de la entrega darán 404.
 | Riesgo | Plan B |
 |---|---|
 | La app está dormida al enseñarla | Abrirla 30 min antes; si aun así tarda, narrar mientras carga |
-| Aún no has renombrado el subdominio | La URL nueva da 404: haz el **Paso 0** o revierte las 4 URLs a `pyrogaurdmicrog` antes de enviar |
+| Un enlace viejo guardado da 404 | La URL buena es `pyroguardmicrog.streamlit.app`; comparte siempre esa |
 | El feed LIVE no publica valores | Es el punto de honestidad del guion: la app lo declara y no inventa |
 | Se cae la red en la presentación | Capturas descargadas + wireframe + guion impreso |
 | `curl` devuelve **303** hacia `share.streamlit.io/-/auth/app` | Es normal: Streamlit crea la sesión y vuelve a la app. Comprobado en incógnito: carga bien. No significa que sea privada |
