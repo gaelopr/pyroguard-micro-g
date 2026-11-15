@@ -69,13 +69,18 @@
 
 ## Texto para "¿cómo usa datos de la NASA?"
 
-> Se usa un recurso de datos de la NASA **en vivo**: el feed público de NASA JSC
-> (`push.lightstreamer.com`, adapter set `ISSLIVE`), del que la app suscribe temperatura
-> (`USLAB000059`) y presión (`USLAB000058`) de cabina del US Lab, con marca temporal
-> GMT. Se consulta desde el servidor de la app, sin credenciales.
+> Se usan **dos recursos de la NASA**, los dos públicos y sin credenciales:
 >
-> Como referencia de comportamiento —no como dataset crudo— se citan las campañas
-> **Saffire I–VI** y **BASS** sobre propagación de llama en microgravedad. El dataset de
+> 1. **En vivo**: el feed de NASA JSC (`push.lightstreamer.com`, adapter set `ISSLIVE`).
+>    La app suscribe 12 canales del US Lab y Node 3 —temperatura, presión de cabina,
+>    presiones parciales de O2, CO2 y N2, refrigerantes y aguas— y declara cuáles traen
+>    dato real en cada sesión.
+> 2. **Histórico**: el repositorio **PSI** (`psi.nasa.gov`) sirve por API pública las
+>    tablas experimentales de **Saffire-I, II y III** (licencia CC0). La app las descarga
+>    en vivo, muestra el DOI, el tamaño y el SHA-256 de lo descargado, y no las mezcla
+>    con el modelo porque son matrices de experimento, no telemetría de cabina.
+>
+> El feed de la ISS es solo en vivo: no existe histórico público. El dataset de
 > demostración del repositorio es sintético y se llama así a propósito.
 
 ## English (si el formulario está en inglés)

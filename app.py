@@ -9,6 +9,7 @@ from plotly.subplots import make_subplots
 
 import anomaly_engine as ae
 import iss_live
+import nasa_psi
 import physics_simulator as ps
 
 st.set_page_config(layout="wide", page_title="PyroGuard Micro-G | NASA Fire Safety", page_icon="🛰️",
@@ -261,8 +262,10 @@ with st.sidebar:
     st.divider()
     modo = st.radio("Modo de datos", ["Simulador Físico Micro-G",
                                       "Live ISS (NASA · Lightstreamer)",
+                                      "Histórico NASA (PSI · Saffire)",
                                       "Subir Dataset Real (CSV NASA OSDR / Saffire)"])
     es_live = modo.startswith("Live")
+    es_psi = modo.startswith("Histórico")
     es_csv = modo.startswith("Subir")
     up = None
     escenario, corte = ps.ESCENARIOS[0], 0
@@ -270,11 +273,11 @@ with st.sidebar:
     ventana = (0, 599)
     if es_csv:
         up = st.file_uploader("CSV de telemetría", type=["csv"])
-    elif not es_live:
+    elif not es_live and not es_psi:
         escenario = st.selectbox("Selector de escenario", ps.ESCENARIOS)
         corte = st.slider("Corte de ventilación (s) · 0 = sin intervención", 0, 550, 0, 5)
 
-    if not es_live:
+    if not es_live and not es_psi:
         st.divider()
         atmosfera = st.selectbox("Selector de atmósfera", list(ps.ATM))
         aea = "Artemis" in atmosfera
@@ -284,6 +287,10 @@ with st.sidebar:
     if es_live:
         st.info("🔗 Feed público NASA JSC → Lightstreamer (`ISSLIVE`). Sin credenciales. "
                 "Solo se muestran como medidos los canales que el feed publica de verdad.")
+    elif es_psi:
+        st.info("📚 Datos históricos reales del repositorio **PSI** de la NASA "
+                "(`psi.nasa.gov`), licencia CC0, sin credenciales. Son tablas del experimento "
+                "Saffire, no telemetría de cabina.")
     elif es_csv:
         st.info("📂 Dataset externo: el mapeador normaliza columnas y el motor IA re-entrena su baseline "
                 "con los primeros 60 s.")
@@ -629,8 +636,82 @@ def render_live_mode() -> None:
                 unsafe_allow_html=True)
 
 
+@st.cache_data(show_spinner=False, ttl=3600)
+def _psi_fetch(acc: str) -> dict:
+    return nasa_psi.fetch(acc)
+
+
+def render_psi_mode() -> None:
+    st.markdown("#### Histórico NASA · PSI (Saffire)")
+    st.caption("Tablas experimentales reales de las quemas en microgravedad de la NASA, "
+               "descargadas de psi.nasa.gov (CC0) por su API pública, sin credenciales. El feed "
+               "de la ISS es solo en vivo: esto es el registro del experimento, no telemetría de cabina.")
+
+    acc = st.selectbox("Investigación", list(nasa_psi.INVESTIGATIONS),
+                       format_func=lambda a: f"{nasa_psi.INVESTIGATIONS[a]['label']} · {a}")
+    st.caption(f"Plataforma: {nasa_psi.INVESTIGATIONS[acc]['platform']} · descarga directa desde PSI")
+
+    if st.button("⬇️ Descargar de psi.nasa.gov", width="stretch"):
+        st.session_state["psi_req"] = acc
+    if st.session_state.get("psi_req") != acc:
+        st.info("Pulsa **Descargar** para traer la tabla oficial del experimento. Se cachea una "
+                "hora, así que puedes volver a mirarla sin golpear otra vez el servidor de NASA.")
+        return
+    try:
+        with st.spinner("Descargando metadatos y tabla desde PSI…"):
+            res = _psi_fetch(acc)
+    except Exception as exc:  # noqa: BLE001
+        st.error(f"**No se pudo descargar {acc}**: {type(exc).__name__}: {exc}")
+        st.caption("PSI ha tenido caídas puntuales este año. Reintenta en un minuto; mientras "
+                   "tanto el simulador y el modo Live siguen funcionando.")
+        return
+
+    df = res["tabla"]
+    sm = nasa_psi.resumen(df)
+    chips = [("Muestras", f"{sm['muestras']}", "", "")]
+    if "materiales" in sm:
+        chips.append(("Materiales", f"{sm['materiales']}", "", ""))
+    if "o2_rango" in sm:
+        chips.append(("O2", sm["o2_rango"].split(" ")[0], "%", ""))
+    if "flujo_rango" in sm:
+        chips.append(("Flujo", sm["flujo_rango"].split(" ")[0], "cm/s", ""))
+    chips.append(("Fichero", f"{res['bytes'] / 1024:.1f}", "kB", ""))
+    st.markdown(
+        '<div class="pg-strip">' + "".join(
+            f'<div class="pg-chip"><span class="pg-chip-l">{lab}</span>'
+            f'<span class="pg-chip-v">{val}<i>{unit}</i></span></div>'
+            for lab, val, unit, tone in chips) + "</div>", unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="pg-card" style="margin-top:8px">'
+        '<div class="pg-kpi-label">Procedencia · verificable fila a fila</div>'
+        f'<div style="margin-top:8px;font-size:12.5px;line-height:1.85">'
+        f'<b>{html.escape(res["titulo"])}</b><br>'
+        f'DOI: <a href="https://doi.org/{html.escape(res["doi"])}" target="_blank">'
+        f'{html.escape(res["doi"])}</a> · Licencia: {html.escape(res["licencia"])}<br>'
+        f'Fichero: <code>{html.escape(res["file"])}</code> · {res["bytes"]:,} bytes · '
+        f'SHA-256 <code>{res["sha256"][:16]}…</code><br>'
+        f'Descargado {html.escape(res["descargado_utc"])} desde '
+        f'<a href="{html.escape(res["url"])}" target="_blank">psi.nasa.gov</a>'
+        '</div></div>', unsafe_allow_html=True)
+
+    _tbl(df)
+    st.caption("Las series temporales crudas de Saffire —imágenes y telemetría de los sensores— "
+               "pesan entre 11 y 33 GB por experimento y no se descargan aquí: esta es la matriz "
+               "experimental del vuelo.")
+    st.info("Estos datos **no se puntúan con MIRI**: describen el experimento (material, flujo, "
+            "%O2, tiempos de ignición y combustión), no la atmósfera de un rack de la ISS. La app "
+            "los muestra como fuente real citada, no como entrada del modelo.")
+    st.markdown('<div class="pg-note">FUENTE: NASA PSI · CC0 · DESCARGA DIRECTA SIN CREDENCIALES</div>',
+                unsafe_allow_html=True)
+
+
 if es_live:
     render_live_mode()
+    st.stop()
+
+if es_psi:
+    render_psi_mode()
     st.stop()
 
 MAX_MB, MAX_ROWS, MIN_ROWS = 25, 200_000, 12

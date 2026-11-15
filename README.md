@@ -88,22 +88,27 @@ datos reales** y lo dice en pantalla en lugar de rellenar los huecos.
 
 ## Datos de la NASA utilizados
 
-Requisito del reto: al menos un recurso de datos de la NASA. Aquí hay uno **en vivo**.
+Requisito del reto: al menos un recurso de datos de la NASA. Aquí hay **dos, uno en vivo
+y otro histórico**, los dos públicos y sin credenciales.
 
 | Recurso | Uso | Código |
 |---|---|---|
-| **ISSLIVE** — telemetría pública de NASA JSC vía Lightstreamer | Temperatura (`USLAB000059`) y presión (`USLAB000058`) de cabina del US Lab, en el modo LIVE | `iss_live.py` |
-| `TIME_000001` (GMT) | Marca temporal de cada muestra | `iss_live.py` |
+| **ISSLIVE** — telemetría pública de NASA JSC vía Lightstreamer | 12 canales del US Lab y Node 3 (temperatura, presión, ppO2, ppCO2, ppN2, refrigerantes, aguas), en el modo LIVE | `iss_live.py` |
+| **PSI** — Physical Sciences Informatics (`psi.nasa.gov`) | Tablas experimentales de **Saffire-I/II/III**, licencia CC0, con DOI, SHA-256 y descarga directa | `nasa_psi.py` |
 
-- Endpoint: `GET https://push.lightstreamer.com/lightstreamer/create_session.txt`, protocolo TLCP, adapter set `ISSLIVE`.
-- Público y sin credenciales: la app desplegada lo consulta en vivo desde los servidores de Streamlit.
-- Los otros cinco canales del modelo (CO, CO2, HCN, humo, radiación) **no** existen
-  en el feed público. La app declara la cobertura y no rellena los huecos.
+- LIVE: `GET https://push.lightstreamer.com/lightstreamer/create_session.txt`, protocolo TLCP, adapter set `ISSLIVE`.
+- PSI: metadatos en `/geode-py/ws/repo/investigations/<ACC>` y ficheros en `/geode-py/ws/studies/<ACC>/download?file=<nombre>`.
+- Ambos se consultan en vivo desde el servidor de la app: no hay datos de NASA copiados al repositorio.
+- Los canales que el modelo de incendio necesita y **no** existen en abierto (CO, HCN,
+  caudal de ventilación, humo, radiación) se declaran en pantalla; la app no rellena huecos.
 
-**Referencias de comportamiento** (no se usan como dataset crudo): campañas
-**Saffire I–VI** y **BASS** de la NASA sobre propagación de llama en microgravedad y
-ausencia de convección natural. El `demo_saffire_sintetico.csv` es sintético y su
-nombre lo dice.
+El feed de la ISS **no tiene histórico público**: es solo en vivo. Lo que sí es histórico
+son los datos de experimento de PSI, que es lo que ofrece el modo «Histórico NASA».
+Las series temporales crudas de Saffire (imágenes y telemetría de los sensores) pesan
+entre 11 y 33 GB por experimento y quedan fuera del alcance de la app; lo que se descarga
+es la matriz experimental del vuelo.
+
+El `demo_saffire_sintetico.csv` es sintético y su nombre lo dice.
 
 ## Cifras de referencia (reproducibles)
 

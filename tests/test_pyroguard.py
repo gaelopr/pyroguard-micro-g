@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import anomaly_engine as ae  # noqa: E402
 import iss_live  # noqa: E402
+import nasa_psi  # noqa: E402
 import physics_simulator as ps  # noqa: E402
 
 ISS = list(ps.ATM)[0]
@@ -230,6 +231,35 @@ class TestLiveISS(unittest.TestCase):
         df = feed.frame()
         self.assertEqual(len(df), 1)
         self.assertAlmostEqual(float(df.cabin_temp_c.iloc[0]), 23.4, delta=0.001)
+
+
+class TestNasaPSI(unittest.TestCase):
+    """Parser de la tabla experimental de PSI, con las cabeceras reales (erratas incluidas)."""
+
+    CSV = (
+        "Sample Number,Material,Samle Thickness ,Sample Length ,Sample Width (cm),"
+        "Air Flow (cm/s),Percent O2 (Note 1),Ignition Power (W),Ignition Time (s),"
+        "Burn Time (s),Flow Direction,?-g Burn Length,?-g Spread Length,"
+        "1-g Burn Length,1-g Spread Rate,Camera 1,Camera 2\n"
+        "2-1,Silicone,0.27 mm,29 cm,5 cm,20 cm/s,~ 21.5,80 W,9.2 s,Insignificant,"
+        "Concurrent,~ 0,n/a,Complete,Acceleratory,S1C1,S1C2\n"
+        "2-2,Silicone,0.61 mm,29 cm,5 cm,20 cm/s,~ 22.1,80 W,9.2 s,Insignificant,"
+        "Concurrent,~ 0,n/a,7.6 cm,1.2 mm/s,n/a,S2C2\n"
+    )
+
+    def test_parse_table_normaliza_cabeceras(self):
+        df = nasa_psi.parse_table(self.CSV)
+        self.assertEqual(len(df), 2)
+        for col in ("muestra", "material", "flujo_cms", "o2_pct", "tiempo_combustion_s"):
+            self.assertIn(col, df.columns)
+        self.assertEqual(df["material"].iloc[0], "Silicone")
+
+    def test_resumen_no_inventa(self):
+        sm = nasa_psi.resumen(nasa_psi.parse_table(self.CSV))
+        self.assertEqual(sm["muestras"], 2)
+        self.assertEqual(sm["materiales"], 1)
+        self.assertEqual(sm["o2_rango"], "21.5–22.1 %")
+        self.assertEqual(sm["flujo_rango"], "20–20 cm/s")
 
 
 if __name__ == "__main__":
