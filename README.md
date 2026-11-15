@@ -14,6 +14,16 @@ tiempo se gana mirando la firma química en su lugar.
 
 ![Dashboard](docs/img/dashboard.png)
 
+La interfaz trae selector de tema **Sistema / Claro / Oscuro**: «Sistema» sigue la
+preferencia del sistema operativo y la elección viaja en la URL (`?theme=light`), así que
+se mantiene al recargar y se puede compartir.
+
+<details><summary>Tema claro</summary>
+
+![Dashboard en tema claro](docs/img/dashboard-light.png)
+
+</details>
+
 ## Qué hace
 
 - **Simula** la física de una quema en microgravedad: inercia térmica, ausencia de

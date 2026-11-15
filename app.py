@@ -14,81 +14,128 @@ import physics_simulator as ps
 st.set_page_config(layout="wide", page_title="PyroGuard Micro-G | NASA Fire Safety", page_icon="🛰️",
                    initial_sidebar_state="expanded")
 
-RED, ORANGE, CYAN, GREEN, YELLOW, VIOLET = "#FF3B30", "#FF6B35", "#00E5FF", "#39FF88", "#FFD166", "#B47CFF"
+_PAL = {
+    "dark": dict(
+        bg="#04070b", glow1="rgba(0,229,255,.10)", glow2="rgba(255,107,53,.075)",
+        grid="rgba(255,255,255,.020)", ink="#C9D6E5", head="#EAF4FF", dim="#7FA0BF",
+        dim2="#6E8AA6", dim3="#5E7A96", faint="#3E5A73", line="rgba(128,170,210,.14)",
+        line2="rgba(128,170,210,.22)", hair="rgba(255,255,255,.05)", panel="rgba(10,18,28,.62)",
+        panel2="rgba(8,14,24,.72)", panel3="rgba(13,27,42,.92)", side="#070c13",
+        header="linear-gradient(90deg, rgba(0,229,255,.07), rgba(6,10,16,.45) 58%, rgba(255,107,53,.06))",
+        btn="rgba(12,22,34,.92)", btnink="#DCE8F5", hover="rgba(0,229,255,.09)", shadow="rgba(0,0,0,.55)",
+        ringbg="rgba(255,255,255,.07)", cyan="#00E5FF", cyanline="rgba(0,229,255,.26)", cyansoft="#8FD8E8",
+        green="#39FF88", greenline="rgba(57,255,136,.4)", yellow="#FFD166", red="#FF3B30",
+        orange="#FF6B35", violet="#B47CFF", plot="rgba(8,14,24,.55)", template="plotly_dark",
+    ),
+    "light": dict(
+        bg="#f2f6fb", glow1="rgba(0,150,190,.10)", glow2="rgba(255,107,53,.07)",
+        grid="rgba(11,26,43,.045)", ink="#22364b", head="#0a1a2b", dim="#46617f",
+        dim2="#58718d", dim3="#6a829c", faint="#94a8bd", line="rgba(16,48,80,.14)",
+        line2="rgba(16,48,80,.26)", hair="rgba(16,48,80,.10)", panel="rgba(255,255,255,.86)",
+        panel2="rgba(255,255,255,.92)", panel3="#ffffff", side="#ffffff",
+        header="linear-gradient(90deg, rgba(0,137,167,.10), rgba(255,255,255,.75) 58%, rgba(255,107,53,.08))",
+        btn="#ffffff", btnink="#14304b", hover="rgba(0,137,167,.10)", shadow="rgba(9,30,60,.14)",
+        ringbg="rgba(16,48,80,.10)", cyan="#0089a7", cyanline="rgba(0,137,167,.35)", cyansoft="#0b6b82",
+        green="#15803d", greenline="rgba(21,128,61,.45)", yellow="#b45309", red="#c1121f",
+        orange="#c2530a", violet="#6d28d9", plot="#ffffff", template="plotly_white",
+    ),
+}
+
+
+def _sistema() -> str:
+    """Preferencia del sistema operativo/navegador ('light' o 'dark')."""
+    try:
+        tipo = getattr(st.context.theme, "type", None)
+        if tipo in ("light", "dark"):
+            return tipo
+    except Exception:
+        pass
+    return "dark"
+
+
+_PREF = st.query_params.get("theme", "auto")
+if _PREF not in ("auto", "light", "dark"):
+    _PREF = "auto"
+TEMA = _sistema() if _PREF == "auto" else _PREF   # tema efectivo
+T = _PAL[TEMA]
+PLOT = {"template": T["template"], "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": T["plot"]}
+_VARS = ":root{" + "".join(f"--{k}:{v};" for k, v in T.items() if k != "template") + "}"
+
+RED, ORANGE, CYAN, GREEN, YELLOW, VIOLET = (T["red"], T["orange"], T["cyan"], T["green"],
+                                            T["yellow"], T["violet"])
 PCFG = {"displaylogo": False,
         "modeBarButtonsToRemove": ["lasso2d", "select2d", "autoScale2d", "toggleSpikelines",
                                    "hoverClosestCartesian", "hoverCompareCartesian"]}
 
-st.markdown("""
-<style>
+CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap');
-.stApp { background-color:#04070b;
+.stApp { background-color:var(--bg);
   background-image:
-    radial-gradient(900px 420px at 14% -8%, rgba(0,229,255,.10), transparent 62%),
-    radial-gradient(720px 380px at 88% -2%, rgba(255,107,53,.075), transparent 62%),
-    linear-gradient(rgba(255,255,255,.020) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.020) 1px, transparent 1px);
+    radial-gradient(900px 420px at 14% -8%, var(--glow1), transparent 62%),
+    radial-gradient(720px 380px at 88% -2%, var(--glow2), transparent 62%),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: auto, auto, 46px 46px, 46px 46px;
   background-attachment: fixed; }
-html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: #C9D6E5; }
-h1, h2, h3, h4 { font-family: 'Share Tech Mono', monospace !important; letter-spacing: .05em; }
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; color: var(--ink); }
+h1, h2, h3, h4 { font-family: 'Share Tech Mono', monospace !important; letter-spacing: .05em; color: var(--head); }
 .block-container { padding-top: 3.2rem; padding-bottom: 2.4rem; max-width: 1320px; }
 .pg-header { display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;
-  border:1px solid rgba(0,229,255,.18); border-radius:12px; padding:14px 18px;
-  background: linear-gradient(90deg, rgba(0,229,255,.07), rgba(6,10,16,.45) 58%, rgba(255,107,53,.06)); }
-.pg-title { font-family:'Share Tech Mono',monospace; font-size:24px; color:#EAF4FF; letter-spacing:.04em; }
-.pg-sub { color:#7FA0BF; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; margin-top:5px; }
+  border:1px solid var(--cyanline); border-radius:12px; padding:14px 18px;
+  background: var(--header); }
+.pg-title { font-family:'Share Tech Mono',monospace; font-size:24px; color:var(--head); letter-spacing:.04em; }
+.pg-sub { color:var(--dim); font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; margin-top:5px; }
 .pg-tags { display:flex; gap:6px; flex-wrap:wrap; }
-.pg-tag { border:1px solid rgba(0,229,255,.26); color:#8FD8E8; border-radius:4px; padding:2px 8px;
+.pg-tag { border:1px solid var(--cyanline); color:var(--cyansoft); border-radius:4px; padding:2px 8px;
   font-family:'Share Tech Mono',monospace; font-size:9.5px; letter-spacing:.1em; }
-.pg-tag-live { border-color:rgba(57,255,136,.4); color:#39FF88; }
-div[data-testid="stWidgetLabel"] p { font-family:'Share Tech Mono',monospace; font-size:10px !important;
-  letter-spacing:.13em; text-transform:uppercase; color:#6E8AA6 !important; }
-.pg-card { border:1px solid rgba(128,170,210,.14); border-radius:10px; padding:11px 14px;
-  background:rgba(10,18,28,.62); min-height:92px; display:flex; flex-direction:column; justify-content:space-between; }
+.pg-tag-live { border-color:var(--greenline); color:var(--green); }
+[data-testid="stWidgetLabel"] p { font-family:'Share Tech Mono',monospace; font-size:10px !important;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--dim2) !important; }
+.pg-card { border:1px solid var(--line); border-radius:10px; padding:11px 14px;
+  background:var(--panel); min-height:92px; display:flex; flex-direction:column; justify-content:space-between; }
 .pg-kpi-label { font-family:'Share Tech Mono',monospace; font-size:9.5px; letter-spacing:.13em;
-  color:#6E8AA6; text-transform:uppercase; }
-.pg-kpi { font-family:'Share Tech Mono',monospace; font-size:21px; color:#EAF4FF; line-height:1.15;
+  color:var(--dim2); text-transform:uppercase; }
+.pg-kpi { font-family:'Share Tech Mono',monospace; font-size:21px; color:var(--head); line-height:1.15;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .pg-kpi-sm { font-size:15px; }
-.pg-nom { color:#39FF88; } .pg-pre { color:#FFD166; } .pg-crit { color:#FF3B30; }
+.pg-nom { color:var(--green); } .pg-pre { color:var(--yellow); } .pg-crit { color:var(--red); }
 .pg-strip { display:flex; gap:6px; flex-wrap:wrap; margin:2px 0 10px 0; }
-.pg-chip { flex:1 1 92px; border:1px solid rgba(128,170,210,.14); border-radius:8px;
-  padding:6px 9px; background:rgba(8,14,24,.72); }
+.pg-chip { flex:1 1 92px; border:1px solid var(--line); border-radius:8px;
+  padding:6px 9px; background:var(--panel2); }
 .pg-chip-l { display:block; font-family:'Share Tech Mono',monospace; font-size:8.5px;
-  letter-spacing:.12em; color:#5E7A96; text-transform:uppercase; }
-.pg-chip-v { display:block; font-family:'Share Tech Mono',monospace; font-size:15px; color:#EAF4FF; }
-.pg-chip-v i { font-style:normal; font-size:9.5px; color:#7FA0BF; margin-left:3px; }
-.pg-step { border-left:2px solid #FF6B35; padding-left:11px; margin-bottom:8px;
-  font-size:13px; color:#C9D6E5; line-height:1.45; }
-.pg-note { font-family:'Share Tech Mono',monospace; font-size:9.5px; letter-spacing:.14em; color:#3E5A73;
+  letter-spacing:.12em; color:var(--dim3); text-transform:uppercase; }
+.pg-chip-v { display:block; font-family:'Share Tech Mono',monospace; font-size:15px; color:var(--head); }
+.pg-chip-v i { font-style:normal; font-size:9.5px; color:var(--dim); margin-left:3px; }
+.pg-step { border-left:2px solid var(--orange); padding-left:11px; margin-bottom:8px;
+  font-size:13px; color:var(--ink); line-height:1.45; }
+.pg-note { font-family:'Share Tech Mono',monospace; font-size:9.5px; letter-spacing:.14em; color:var(--faint);
   text-align:center; margin-top:16px; }
 /* ---------- veredicto: tarjeta principal con anillo ---------- */
 .pg-hero { display:grid; grid-template-columns:132px 1fr; gap:24px; align-items:center;
-  margin:4px 0 14px; border:1px solid rgba(128,170,210,.18); border-radius:16px;
-  padding:16px 20px; background:linear-gradient(135deg, rgba(13,27,42,.88), rgba(8,14,24,.74));
-  box-shadow:0 24px 50px -34px #000, inset 0 1px 0 rgba(255,255,255,.05); }
+  margin:4px 0 14px; border:1px solid var(--line2); border-radius:16px;
+  padding:16px 20px; background:linear-gradient(135deg, var(--panel3), var(--panel2));
+  box-shadow:0 24px 50px -34px var(--shadow), inset 0 1px 0 var(--ringbg); }
 .pg-ring { position:relative; width:124px; height:124px; display:flex; flex-direction:column;
   align-items:center; justify-content:center; }
 .pg-ring svg { position:absolute; inset:0; transform:rotate(-90deg); }
-.pg-ring-bg { fill:none; stroke:rgba(255,255,255,.07); stroke-width:9; }
+.pg-ring-bg { fill:none; stroke:var(--ringbg); stroke-width:9; }
 .pg-ring-fg { fill:none; stroke-width:9; stroke-linecap:round; transition:stroke-dashoffset .7s ease; }
-.pg-ring-v { font-family:'Share Tech Mono',monospace; font-size:25px; color:#EAF4FF; line-height:1;
+.pg-ring-v { font-family:'Share Tech Mono',monospace; font-size:25px; color:var(--head); line-height:1;
   display:flex; align-items:baseline; gap:1px; }
 .pg-ring-l { display:block; margin-top:5px; font-family:'Share Tech Mono',monospace; font-size:7.5px;
-  letter-spacing:.18em; color:#5E7A96; text-transform:uppercase; }
+  letter-spacing:.18em; color:var(--dim3); text-transform:uppercase; }
 .pg-hero-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .pg-pill { font-family:'Share Tech Mono',monospace; font-size:10.5px; letter-spacing:.15em;
   padding:4px 11px; border-radius:999px; border:1px solid currentColor; }
-.pg-hero-sub { font-size:12.5px; color:#8FA9C2; }
+.pg-hero-sub { font-size:12.5px; color:var(--dim); }
 .pg-hero-kpis { display:flex; gap:26px; flex-wrap:wrap; margin:11px 0 2px; }
 .pg-hero-kpis > div { display:flex; flex-direction:column; gap:2px; }
 .pg-hero-kpis span { font-family:'Share Tech Mono',monospace; font-size:8.5px; letter-spacing:.12em;
-  color:#5E7A96; text-transform:uppercase; }
-.pg-hero-kpis b { font-family:'Share Tech Mono',monospace; font-size:17px; font-weight:400; color:#EAF4FF; }
-.pg-hero-cta { margin-top:10px; font-size:12.5px; color:#C9D6E5; border-left:2px solid #00E5FF;
+  color:var(--dim3); text-transform:uppercase; }
+.pg-hero-kpis b { font-family:'Share Tech Mono',monospace; font-size:17px; font-weight:400; color:var(--head); }
+.pg-hero-cta { margin-top:10px; font-size:12.5px; color:var(--ink); border-left:2px solid var(--cyan);
   padding-left:10px; line-height:1.5; }
-.pg-hero-cta b { color:#EAF4FF; }
+.pg-hero-cta b { color:var(--head); }
 @keyframes pgpulse { 0%,100%{opacity:1} 50%{opacity:.42} }
 .pg-pulse { animation:pgpulse 1.9s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pg-pulse { animation:none; } }
@@ -97,33 +144,64 @@ div[data-testid="stWidgetLabel"] p { font-family:'Share Tech Mono',monospace; fo
   .pg-ring { width:104px; height:104px; }
   .pg-ring-v { font-size:22px; }
   .pg-hero-kpis { gap:16px; }
-  /* columnas apiladas: los botones y métricas no se recortan en móvil */
   div[data-testid="stHorizontalBlock"] { flex-wrap:wrap !important; }
   div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] { min-width:44% !important; }
-  div.stButton > button { white-space:nowrap; }
+  div[data-testid="stButton"] button { white-space:nowrap; }
 }
 /* ---------- controles ---------- */
-div.stButton > button { border-radius:9px; border:1px solid rgba(128,170,210,.22);
-  background:rgba(12,22,34,.92); color:#DCE8F5; font-family:'Share Tech Mono',monospace;
+div[data-testid="stButton"] button { border-radius:9px; border:1px solid var(--line2);
+  background:var(--btn); color:var(--btnink); font-family:'Share Tech Mono',monospace;
   font-size:11px; letter-spacing:.07em; padding:7px 13px; transition:.16s ease; }
-div.stButton > button:hover { border-color:rgba(0,229,255,.55); color:#EAF4FF;
-  background:rgba(0,229,255,.09); transform:translateY(-1px); }
-div.stButton > button:focus-visible { outline:2px solid #00E5FF; outline-offset:2px; }
-div[data-testid="stMetric"] { border:1px solid rgba(128,170,210,.14); border-radius:10px;
-  padding:9px 12px; background:rgba(8,14,24,.55); }
-div[data-testid="stAlert"] { border-radius:10px; }
-div[data-testid="stSidebar"] { background:#070c13; border-right:1px solid rgba(0,229,255,.12); }
-.pg-side-h { font-family:'Share Tech Mono',monospace; font-size:15px; color:#EAF4FF; letter-spacing:.04em; }
-.pg-side-s { color:#6E8AA6; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; margin-top:4px; }
-.stTabs [data-baseweb="tab-list"] { gap:2px; border-bottom:1px solid rgba(128,170,210,.16); }
+div[data-testid="stButton"] button:hover { border-color:var(--cyanline); color:var(--head);
+  background:var(--hover); transform:translateY(-1px); }
+div[data-testid="stButton"] button:focus-visible { outline:2px solid var(--cyan); outline-offset:2px; }
+div[data-testid="stMetric"] { border:1px solid var(--line); border-radius:10px;
+  padding:9px 12px; background:var(--panel2); }
+div[data-testid="stMetricValue"] { font-family:'Share Tech Mono',monospace; color:var(--head) !important;
+  font-size:19px; }
+div[data-testid="stMetricLabel"] p { font-size:10px !important; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--dim2) !important; }
+[data-testid="stAlertContainer"] { background:var(--panel2) !important; }
+[data-testid="stAlertContainer"] p { color:var(--ink) !important; }
+div[data-testid="stAlert"] { border-radius:10px; background:var(--panel) !important;
+  border:1px solid var(--line2) !important; }
+div[data-testid="stAlert"] p, div[data-testid="stAlert"] li { color:var(--ink) !important; }
+div[data-testid="stSidebar"] { background:var(--side); border-right:1px solid var(--cyanline); }
+.pg-side-h { font-family:'Share Tech Mono',monospace; font-size:15px; color:var(--head); letter-spacing:.04em; }
+.pg-side-s { color:var(--dim2); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; margin-top:4px; }
+.stTabs [data-baseweb="tab-list"] { gap:2px; border-bottom:1px solid var(--line); }
 .stTabs [data-baseweb="tab"] { font-family:'Share Tech Mono',monospace; font-size:12px;
-  letter-spacing:.1em; padding:8px 14px; }
-.stTabs [aria-selected="true"] { color:#00E5FF !important; }
-.stTabs [data-baseweb="tab-highlight"] { background-color:#00E5FF; }
-div[data-testid="stMetricValue"] { font-family:'Share Tech Mono',monospace; color:#EAF4FF; font-size:19px; }
-div[data-testid="stMetricLabel"] p { font-size:10px !important; letter-spacing:.1em; text-transform:uppercase; }
-</style>
-""", unsafe_allow_html=True)
+  letter-spacing:.1em; padding:8px 14px; color:var(--dim2); }
+.stTabs [aria-selected="true"] { color:var(--cyan) !important; }
+.stTabs [data-baseweb="tab-highlight"] { background-color:var(--cyan); }
+/* ---------- superficies de widgets (siguen el tema activo) ---------- */
+div[data-baseweb="select"] > div { background-color:var(--panel2) !important;
+  border-color:var(--line2) !important; color:var(--head) !important; }
+div[data-baseweb="popover"] div[role="listbox"], div[data-baseweb="popover"] ul { background-color:var(--panel3) !important; }
+div[data-baseweb="popover"] li, div[data-baseweb="popover"] div[role="option"] { color:var(--ink) !important; }
+div[data-baseweb="popover"] li:hover, div[data-baseweb="popover"] div[role="option"]:hover { background-color:var(--hover) !important; }
+[data-testid="stFileUploader"] section { background:var(--panel2); border-color:var(--line2); }
+[data-testid="stFileUploader"] section small, [data-testid="stFileUploader"] section span { color:var(--dim); }
+[data-testid="stExpander"] details { background:var(--panel2); border-color:var(--line2); }
+[data-testid="stExpander"] summary { color:var(--head); }
+[data-testid="stCaptionContainer"] p { color:var(--dim2) !important; }
+[data-testid="stToggle"] p, [data-testid="stRadio"] p, [data-testid="stCheckbox"] p,
+[data-testid="stToggle"] span, [data-testid="stRadio"] span { color:var(--ink) !important; }
+[data-testid="stToggle"] svg, [data-testid="stRadio"] svg { color:var(--cyan); }
+div[data-testid="stButton"] button, div[data-testid="stButton"] button:focus:not(:active) {
+  background:var(--btn) !important; color:var(--btnink) !important; border-color:var(--line2) !important; }
+div[data-testid="stButton"] button:hover { background:var(--hover) !important; color:var(--head) !important;
+  border-color:var(--cyanline) !important; }
+section[data-testid="stSidebar"], div[data-testid="stSidebar"] { background:var(--side) !important; }
+header[data-testid="stHeader"], div[data-testid="stToolbar"] { background:transparent !important; }
+[data-testid="stAlertContentSuccess"], [data-testid="stAlertContentInfo"],
+[data-testid="stAlertContentWarning"], [data-testid="stAlertContentError"] {
+  background:transparent !important; color:var(--ink) !important; }
+[data-testid="stAlert"] svg { fill:currentColor !important; }
+div[data-testid="stDownloadButton"] button {
+  background:var(--btn) !important; color:var(--btnink) !important; border-color:var(--line2) !important; }
+"""
+st.markdown(f"<style>{_VARS}" + CSS + "</style>", unsafe_allow_html=True)
 
 st.markdown("""
 <div class="pg-header">
@@ -142,6 +220,18 @@ with st.sidebar:
     st.markdown('<div class="pg-side-h">🛰️ PyroGuard Micro-G</div>'
                 '<div class="pg-side-s">Microgravity Combustion Telemetry &amp; AI Early Warning</div>',
                 unsafe_allow_html=True)
+    st.divider()
+    _labels = {"auto": "Sistema", "light": "Claro", "dark": "Oscuro"}
+    _pick = st.radio("Tema", list(_labels.values()), index=list(_labels).index(_PREF),
+                     horizontal=True,
+                     help="«Sistema» sigue la preferencia del sistema operativo. "
+                          "La elección se guarda en la URL y se recuerda al recargar.")
+    _new = next(k for k, v in _labels.items() if v == _pick)
+    if _new != _PREF:
+        st.query_params["theme"] = _new
+        st.rerun()
+    st.caption(f"Sistema: {'claro' if _sistema() == 'light' else 'oscuro'} · "
+               f"aplicando: {'claro' if TEMA == 'light' else 'oscuro'}")
     st.divider()
     modo = st.radio("Modo de datos", ["Simulador Físico Micro-G",
                                       "Live ISS (NASA · Lightstreamer)",
@@ -182,7 +272,7 @@ with st.sidebar:
     st.caption("Motor determinista local · IsolationForest + MIRI · sin API keys")
 
 def _tone(state: str) -> str:
-    return {"streaming": GREEN, "connecting": YELLOW, "idle": "#6E8AA6"}.get(state, RED)
+    return {"streaming": GREEN, "connecting": YELLOW, "idle": T["dim2"]}.get(state, RED)
 
 
 def _session_log(df_live: pd.DataFrame, sim, scenario: str, status) -> pd.DataFrame:
@@ -227,8 +317,8 @@ def _infer_panel(df_live: pd.DataFrame):
                if real_temp is not None else
                "Sin datos reales disponibles: este panel es simulación pura, sin anclaje.")
     st.markdown(
-        '<div class="pg-card" style="border-color:rgba(255,209,102,.40);background:rgba(255,209,102,.05)">'
-        '<div class="pg-kpi-label" style="color:#FFD166">Inferencia del modelo · no son mediciones</div>'
+        '<div class="pg-card" style="border-color:var(--yellow);background:var(--panel)">'
+        '<div class="pg-kpi-label" style="color:var(--yellow)">Inferencia del modelo · no son mediciones</div>'
         '<div style="font-size:12.5px;line-height:1.7;margin-top:6px">'
         'CO, CO2, HCN, caudal de ventilación, humo y flujo radiativo los genera <b>physics_simulator</b>: '
         'describen el modelo, no la atmósfera real de la ISS. ' + anclaje +
@@ -249,7 +339,7 @@ def _infer_panel(df_live: pd.DataFrame):
                              line=dict(color=YELLOW, width=1.6, dash="dash")), row=1, col=1)
     if real_temp is None:
         fig.add_annotation(text="sin muestras reales del feed", row=1, col=1, showarrow=False,
-                           font=dict(size=10, color="#7FA0BF"), xref="x domain", yref="y domain",
+                           font=dict(size=10, color=T["dim"]), xref="x domain", yref="y domain",
                            x=0.5, y=0.06)
     for col, color, label in [("co_ppm", RED, "CO inferido (ppm)"),
                               ("hcn_ppm", VIOLET, "HCN inferido (ppm)")]:
@@ -260,18 +350,19 @@ def _infer_panel(df_live: pd.DataFrame):
                   secondary_y=True)
     fig.add_trace(go.Scatter(x=sim.timestamp_sec, y=sim.smoke_obscuration_pct_m,
                              name="humo inferido (%/m)",
-                             line=dict(color="#9AA7B4", width=1.6, dash="dash")), row=3, col=1)
+                             line=dict(color=T["dim"], width=1.6, dash="dash")), row=3, col=1)
     fig.add_trace(go.Scatter(x=sim.timestamp_sec, y=sim.radiative_heat_flux_kwm2,
                              name="flujo radiativo inferido (kW/m²)",
                              line=dict(color=ORANGE, width=1.6, dash="dash")), row=3, col=1,
                   secondary_y=True)
-    fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                      plot_bgcolor="rgba(8,14,24,.55)", height=560,
+    fig.update_layout(**PLOT, height=560,
                       margin=dict(l=62, r=62, t=92, b=36), hovermode="x unified",
-                      legend=dict(orientation="h", yanchor="bottom", y=1.08, x=0, font=dict(size=9.5)),
-                      font=dict(family="Consolas, monospace", size=10.5, color="#C9D6E5"))
-    fig.update_xaxes(gridcolor="rgba(255,255,255,.05)", title_text="t (s)", row=3, col=1)
-    fig.update_yaxes(gridcolor="rgba(255,255,255,.05)")
+                      legend=dict(orientation="h", yanchor="bottom", y=1.08, x=0, font=dict(size=9.5, color=T["ink"])),
+                      font=dict(family="Consolas, monospace", size=10.5, color=T["ink"]))
+    fig.update_xaxes(gridcolor=T["hair"], title_text="t (s)", row=3, col=1,
+                     tickfont=dict(color=T["ink"]), title_font=dict(color=T["dim"]))
+    fig.update_yaxes(gridcolor=T["hair"], tickfont=dict(color=T["ink"]),
+                     title_font=dict(color=T["dim"]))
     fig.update_yaxes(title_text="CO2 ppm", row=2, col=1, secondary_y=True, showgrid=False)
     fig.update_yaxes(title_text="kW/m²", row=3, col=1, secondary_y=True, showgrid=False)
     st.plotly_chart(fig, config=PCFG, width="stretch")
@@ -358,15 +449,16 @@ def render_live_mode() -> None:
                 fig.add_trace(go.Scatter(x=df_live.t, y=df_live.cabin_pressure_mmhg,
                                          name="presión (mmHg)", mode="lines+markers",
                                          line=dict(color=CYAN, width=1.6)), secondary_y=True)
-            fig.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)",
-                              plot_bgcolor="rgba(8,14,24,.55)", height=330,
+            fig.update_layout(**PLOT, height=330,
                               margin=dict(l=60, r=60, t=60, b=36),
-                              legend=dict(orientation="h", yanchor="bottom", y=1.06, x=0, font=dict(size=9.5)),
-                              font=dict(family="Consolas, monospace", size=11, color="#C9D6E5"),
+                              legend=dict(orientation="h", yanchor="bottom", y=1.06, x=0, font=dict(size=9.5, color=T["ink"])),
+                              font=dict(family="Consolas, monospace", size=11, color=T["ink"]),
                               hovermode="x unified")
             fig.update_xaxes(title_text="segundos desde la primera muestra",
-                             gridcolor="rgba(255,255,255,.05)")
-            fig.update_yaxes(gridcolor="rgba(255,255,255,.05)")
+                             gridcolor=T["hair"], tickfont=dict(color=T["ink"]),
+                             title_font=dict(color=T["dim"]))
+            fig.update_yaxes(gridcolor=T["hair"], tickfont=dict(color=T["ink"]),
+                             title_font=dict(color=T["dim"]))
             st.plotly_chart(fig, config=PCFG, width="stretch")
 
         st.markdown(
@@ -529,12 +621,14 @@ with q4:
 
 def _style(fig, t_now, h=360, rows=3):
     fig.update_layout(
-        template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(8,14,24,.55)",
+        **PLOT,
         height=h, margin=dict(l=64, r=64, t=120, b=38), hovermode="x unified",
-        legend=dict(orientation="h", yanchor="bottom", y=1.10, x=0, font=dict(size=9.5)),
-        font=dict(family="Consolas, monospace", size=11, color="#C9D6E5"))
-    fig.update_xaxes(gridcolor="rgba(255,255,255,.05)", range=[ventana_eff[0], ventana_eff[1]])
-    fig.update_yaxes(gridcolor="rgba(255,255,255,.05)")
+        legend=dict(orientation="h", yanchor="bottom", y=1.10, x=0, font=dict(size=9.5, color=T["ink"])),
+        font=dict(family="Consolas, monospace", size=11, color=T["ink"]))
+    fig.update_xaxes(gridcolor=T["hair"], range=[ventana_eff[0], ventana_eff[1]],
+                     tickfont=dict(color=T["ink"]), title_font=dict(color=T["dim"]))
+    fig.update_yaxes(gridcolor=T["hair"], tickfont=dict(color=T["ink"]),
+                     title_font=dict(color=T["dim"]))
     if rows:
         fig.update_xaxes(title_text="t (s)", row=rows, col=1)
     if corte:
@@ -629,18 +723,18 @@ def live_panel():
         with g2:
             gauge = go.Figure(go.Indicator(
                 mode="gauge+number", value=live_miri,
-                number=dict(suffix=" %", font=dict(size=27, color="#EAF4FF")),
-                title=dict(text=f"MIRI @ t={int(t_now)} s", font=dict(size=11, color="#6E8AA6")),
-                gauge=dict(axis=dict(range=[0, 100], tickcolor="#6E8AA6", tickfont=dict(size=9)),
+                number=dict(suffix=" %", font=dict(size=27, color=T["head"])),
+                title=dict(text=f"MIRI @ t={int(t_now)} s", font=dict(size=11, color=T["dim2"])),
+                gauge=dict(axis=dict(range=[0, 100], tickcolor=T["dim2"], tickfont=dict(size=9)),
                            bar=dict(color=ORANGE, thickness=0.30),
-                           bgcolor="rgba(255,255,255,.04)", borderwidth=0,
+                           bgcolor=T["hair"], borderwidth=0,
                            steps=[dict(range=[0, 35], color="rgba(57,255,136,.30)"),
                                   dict(range=[35, 65], color="rgba(255,209,102,.30)"),
                                   dict(range=[65, 100], color="rgba(255,59,48,.35)")],
                            threshold=dict(line=dict(color=RED, width=3), value=65))))
-            gauge.update_layout(template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", height=250,
+            gauge.update_layout(template=T["template"], paper_bgcolor="rgba(0,0,0,0)", height=250,
                                 margin=dict(l=18, r=18, t=34, b=8),
-                                font=dict(family="Consolas, monospace", color="#C9D6E5"))
+                                font=dict(family="Consolas, monospace", color=T["ink"]))
             st.plotly_chart(gauge, config={"displayModeBar": False}, width="stretch")
             st.markdown(f"""
 <div class="pg-card">
