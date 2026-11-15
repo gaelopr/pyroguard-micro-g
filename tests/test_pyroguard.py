@@ -242,6 +242,23 @@ class TestLiveISS(unittest.TestCase):
         self.assertAlmostEqual(float(df.cabin_temp_c.iloc[0]), 23.4, delta=0.001)
 
 
+class TestValidacion(unittest.TestCase):
+    """El protocolo de docs/VALIDACION.md debe seguir dando lo que la documentación afirma."""
+
+    def test_protocolo_detecta_incendios_y_no_dispara_sin_fuego(self):
+        import validation
+
+        res = validation.evaluar(reps=5)
+        filas = {(f["Clase"], f["Escenario"], f["Atmósfera"]): f for f in res["filas"]}
+        for escenario in validation.POSITIVOS.values():
+            for atm in ("ISS", "AEA"):
+                self.assertEqual(filas[("incendio", escenario, atm)]["Detecta IA"], "5/5",
+                                 f"{escenario} · {atm}")
+        for negativo in ("Operación nominal", "Corte de ventilación sin fuego"):
+            self.assertEqual(filas[("negativo", negativo, "ISS")]["Detecta IA"], "0/5", negativo)
+        self.assertGreater(res["auc"], 0.9)
+
+
 class TestNasaPSI(unittest.TestCase):
     """Parser de la tabla experimental de PSI, con las cabeceras reales (erratas incluidas)."""
 

@@ -97,7 +97,9 @@
 
 - App desplegada y verificada **desde una sesión anónima** (ventana de incógnito): carga el veredicto y las tres pestañas. Modo LIVE y subida de CSV probados a mano en el dominio público.
 - Repositorio público en `master`, 8 commits, README con badges y 12 secciones.
-- **23 tests** en verde en local (3 s) y en GitHub Actions (`success`).
+- **28 tests** en verde en local (13 s) y en GitHub Actions (`success`), incluido el protocolo
+  de validación: 180/180 detecciones con 0 falsas alarmas en 90 corridas sin fuego
+  (`python validation.py`, detalle en [`docs/VALIDACION.md`](docs/VALIDACION.md)).
 - Documentación: persona, diseño, arquitectura, modelo físico, motor IA, mapeo de datos, LIVE (7 documentos) + wireframe.
 - Cifras del guion fijadas por la suite: 19,9 / 59,1 / 98,0 / 50,1 · +323 s · CO 192→33 · CSV +72 s.
 

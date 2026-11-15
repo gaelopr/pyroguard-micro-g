@@ -298,10 +298,6 @@ with st.sidebar:
         st.success("Sin intervención · la ventilación sostiene la convección forzada.")
     else:
         st.error(f"Corte en t={corte} s · airflow → 0 cm/s en ~30 s. Combustión limitada por difusión.")
-    if not es_live:
-        st.divider()
-        ventana = st.slider("Ventana de análisis (s)", 0, 599, (0, 599), 5,
-                            help="Limita el eje temporal de todas las gráficas.")
     st.caption("Motor determinista local · IsolationForest + MIRI · sin API keys")
 
 def _tone(state: str) -> str:
@@ -842,6 +838,15 @@ if up_rep is not None:
 if len(raw) < MIN_ROWS:
     st.error(f"**Dataset demasiado corto**: {len(raw)} muestras; el baseline necesita al menos {MIN_ROWS}.")
     st.stop()
+
+# La ventana se dimensiona con el dataset ya cargado: antes topaba en 599 s y cualquier
+# telemetría más larga (un vuelo Saffire, una sesión de horas) quedaba cortada.
+with st.sidebar:
+    st.divider()
+    _t_max = int(max(599, round(float(raw["timestamp_sec"].iloc[-1]))))
+    ventana = st.slider("Ventana de análisis (s)", 0, _t_max, (0, _t_max), 5,
+                        help="Cubre todo el dataset por defecto; acota el eje temporal de "
+                             "todas las gráficas.")
 
 df = ae.detectar_anomalias(raw)
 bench = ae.calcular_ventaja_deteccion(df)

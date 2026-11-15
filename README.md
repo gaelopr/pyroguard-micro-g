@@ -126,7 +126,26 @@ El `demo_saffire_sintetico.csv` es sintético y su nombre lo dice.
 | Pirólisis de cableado | 59,1 % | 26,7 °C | 88 ppm | HCN 12,4 ppm · detector tradicional ciego |
 | Propagación por ventilación | 98,0 % | 30,8 °C | 192 ppm | IA 180 s vs tradicional 503 s → **+323 s** |
 | Llama fría | 50,1 % | 23,4 °C | 60 ppm | PRE-IGNICIÓN, humo 0,21 %/m |
-| Artemis + corte a 220 s | — | 25,3 °C | 33 ppm | CO 192 → 33 ppm, radiación 4,51 → 3,60 kW/m² |
+| Artemis + corte a 220 s | — | 25,3 °C | 54 ppm | CO 192 → 54 ppm, radiación 4,51 → 3,60 kW/m² |
+
+## Validación del detector
+
+Protocolo repetible en `validation.py` (30 repeticiones por caso, ruido de sensor distinto en
+cada una). Detalle metodológico y tabla completa en [`docs/VALIDACION.md`](docs/VALIDACION.md).
+
+```bash
+python validation.py
+```
+
+| Clase | Casos | Detección IA | Detección clásica | Ventaja |
+|---|---|---|---|---|
+| Incendio (pirólisis, propagación, llama fría × ISS y AEA) | 180 corridas | **180/180** | 60/180 | +325 ± 7 s cuando el clásico llega a verlo |
+| Sin fuego (nominal y corte de ventilación) | 90 corridas | **0/90** falsas alarmas | 0/90 | — |
+
+AUC del MIRI pico separando incendio de no-incendio: **1.000** en este banco. El AUC alto es
+esperable —los positivos son los regímenes que modela el simulador— así que lo que la tabla
+demuestra es **robustez al ruido y cero falsos positivos en un transitorio de cabina**, no
+rendimiento en vuelo real.
 
 ## Tests
 
@@ -134,10 +153,11 @@ El `demo_saffire_sintetico.csv` es sintético y su nombre lo dice.
 python -m unittest discover -s tests -v
 ```
 
-Se ejecuta también en cada push con GitHub Actions. 23 comprobaciones en unos 4 s, sin dependencias nuevas: magnitudes de los cuatro
-escenarios, la ventaja de +323 s, el corte de ventilación, las conversiones del mapeador,
-el rechazo de datasets incompletos y las cifras exactas que se dicen en la demo. Si un
-cambio mueve un número del guion, la suite falla.
+Se ejecuta también en cada push con GitHub Actions. 28 comprobaciones en unos 13 s, sin
+dependencias nuevas: magnitudes de los cuatro escenarios, la ventaja de +323 s, el corte de
+ventilación, las conversiones del mapeador, el rechazo de datasets incompletos, el protocolo
+de validación y las cifras exactas que se dicen en la demo. Si un cambio mueve un número del
+guion, la suite falla.
 
 ## Estructura
 
@@ -146,6 +166,8 @@ app.py                 UI Streamlit (Mission Control dark): 3 pestañas y modo L
 physics_simulator.py   Modelo físico: escenarios, atmósferas, corte de ventilación
 anomaly_engine.py      Mapeo de CSV con unidades, IsolationForest, MIRI, protocolo
 iss_live.py            Cliente TLCP propio + buffer de muestras reales
+nasa_psi.py            Cliente de PSI (NASA) + parser de las tablas de Saffire
+validation.py          Protocolo de validación: detección, falsos positivos, ventaja, AUC
 demo_saffire_sintetico.csv   Dataset de demostración (sintético, unidades crudas)
 tests/test_pyroguard.py     Regresión de las cifras del guion y de los escenarios
 GUION_DEMO.md          Guion de presentación de 5 minutos
@@ -163,6 +185,7 @@ docs/                  Documentación: persona, diseño, arquitectura, física, 
 - [Motor de detección: IsolationForest y MIRI](docs/MOTOR_IA.md)
 - [Mapeo y validación de CSV](docs/MAPEO_DATOS.md)
 - [Modo LIVE: qué publica la NASA de verdad](docs/LIVE_ISS.md)
+- [Validación del detector](docs/VALIDACION.md) — protocolo, tabla de resultados y qué no demuestra
 
 ## Límites conocidos
 

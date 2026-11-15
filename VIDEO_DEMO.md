@@ -71,7 +71,7 @@ informe "7 de 8 canales". Después, volver a **Simulador · Nominal**.
 > "La app también lee el feed público de la NASA en vivo: doce canales, y declara cuáles
 > traen dato de verdad. Los que faltan no existen en abierto, y no los inventa. Acepta
 > además CSV externos, detecta unidades y se niega a analizar si falta lo mínimo. Todo es
-> local, determinista y con 23 tests automáticos. No predice el fuego: gana los segundos en
+> local, determinista y con un protocolo de 270 corridas en verde. No predice el fuego: gana los segundos en
 > los que todavía puedes actuar."
 
 **Cierre en negro con una línea de texto:** `PyroGuard Micro-G · github.com/gaelopr/pyroguard-micro-g`
