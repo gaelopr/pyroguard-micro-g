@@ -3,11 +3,25 @@
 > Todo lo que hay que comprobar y pegar antes del **domingo a las 23:59**.
 > Cada cosa está verificada salvo lo marcado como *tu parte*.
 
+## Paso 0 · Renombrar el subdominio (2 min, hazlo primero)
+
+La app se desplegó como `pyrogaurdmicrog` (con errata) y la documentación ya apunta a
+`pyroguard-micro-g`. Streamlit **no redirige** la URL vieja, así que el renombrado tiene
+que hacerse antes de enviar o los enlaces de la entrega darán 404.
+
+1. Entra en <https://share.streamlit.io> → tu app → menú **⋮** → **Settings**.
+2. Pestaña **General** → **Custom subdomain** → escribe `pyroguard-micro-g` → **Save**.
+   (Mínimo 6 caracteres; ya está comprobado que ese subdominio está libre.)
+3. La app se redespliega sola. Verifica en incógnito:
+   <https://pyroguard-micro-g.streamlit.app> debe abrir el veredicto.
+4. Si no puedes renombrar, **revierte las 4 apariciones** de la URL nueva (README ×2,
+   ENTREGA, VIDEO_DEMO) y envía con la vieja: es fea, pero funciona.
+
 ## Enlaces
 
 | Qué | Enlace |
 |---|---|
-| **App en vivo** | https://pyrogaurdmicrog.streamlit.app |
+| **App en vivo** | https://pyroguard-micro-g.streamlit.app |
 | **Repositorio** | https://github.com/gaelopr/pyroguard-micro-g |
 | Guion de 5 min | [GUION_DEMO.md](GUION_DEMO.md) |
 | Wireframe | [docs/img/wireframe.png](docs/img/wireframe.png) · [versión navegable](docs/wireframe.html) |
@@ -104,14 +118,14 @@
   de validación: 180/180 detecciones con 0 falsas alarmas en 90 corridas sin fuego
   (`python validation.py`, detalle en [`docs/VALIDACION.md`](docs/VALIDACION.md)).
 - Documentación: persona, diseño, arquitectura, modelo físico, motor IA, mapeo de datos, LIVE (7 documentos) + wireframe.
-- Cifras del guion fijadas por la suite: 19,9 / 59,1 / 98,0 / 50,1 · +323 s · CO 192→33 · CSV +72 s.
+- Cifras del guion fijadas por la suite: 19,9 / 59,1 / 98,0 / 50,1 · +323 s · CO 192→34 · CSV +72 s.
 
 ## Riesgos y plan B
 
 | Riesgo | Plan B |
 |---|---|
 | La app está dormida al enseñarla | Abrirla 30 min antes; si aun así tarda, narrar mientras carga |
-| La URL dice `pyrogaurd` (typo) | Compartir el enlace, nunca dictarlo; está tal cual en el formulario |
+| Aún no has renombrado el subdominio | La URL nueva da 404: haz el **Paso 0** o revierte las 4 URLs a `pyrogaurdmicrog` antes de enviar |
 | El feed LIVE no publica valores | Es el punto de honestidad del guion: la app lo declara y no inventa |
 | Se cae la red en la presentación | Capturas descargadas + wireframe + guion impreso |
 | `curl` devuelve **303** hacia `share.streamlit.io/-/auth/app` | Es normal: Streamlit crea la sesión y vuelve a la app. Comprobado en incógnito: carga bien. No significa que sea privada |
