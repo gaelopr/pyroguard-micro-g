@@ -794,6 +794,12 @@ if es_psi:
 
 MAX_MB, MAX_ROWS, MIN_ROWS = 25, 200_000, 12
 
+if es_csv and up is None:
+    st.info("**Sube un CSV** para analizarlo. Mientras no haya fichero no se calcula nada: "
+            "mostrar aquí el simulador haciéndolo pasar por dataset externo sería mentir sobre el origen "
+            "de los datos. Usa el modo *Simulador Físico Micro-G* si quieres ver el motor funcionando.")
+    st.stop()
+
 up_rep = None
 if up is not None:
     corte = 0
@@ -861,7 +867,7 @@ st.markdown(
     f'<circle class="pg-ring-fg" cx="60" cy="60" r="52" stroke="{ring}" '
     f'stroke-dasharray="{_c:.1f}" stroke-dashoffset="{_c * (1 - pct / 100):.1f}"/></svg>'
     f'<span class="pg-ring-v" style="color:{ring}">{pct:.0f}<span style="font-size:13px">%</span></span>'
-    f'<span class="pg-ring-l">MIRI</span></div>'
+    f'<span class="pg-ring-l">MIRI PICO</span></div>'
     f'<div><div class="pg-hero-top">'
     f'<span class="pg-pill {cls}{pulso}">{nivel}</span>'
     f'<span class="pg-hero-sub">{proto["tipo_combustion"]}</span></div>'

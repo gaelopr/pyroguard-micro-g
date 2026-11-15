@@ -70,7 +70,9 @@ def simular_escenario(escenario=0, atmosfera=list(ATM)[0], corte_ventilacion_seg
     t = T.copy()
 
     pot_raw = _potencial(esc, t)
-    ref = np.cumsum(pot_raw * f_atm).max() or 1.0
+    # Normalización SIEMPRE contra la atmósfera de referencia: si se normaliza con el
+    # factor de la atmósfera activa, ese factor se cancela y AEA no cambiaría los gases.
+    ref = np.cumsum(pot_raw).max() or 1.0
 
     corte = int(corte_ventilacion_seg)
     pot_eff = pot_raw.copy()
@@ -80,7 +82,7 @@ def simular_escenario(escenario=0, atmosfera=list(ATM)[0], corte_ventilacion_seg
         airflow = np.where(t < corte, airflow, airflow[corte] * np.exp(-(t - corte) / 14.0))
 
     pot_eff = pot_eff * f_atm
-    acc = np.clip(np.cumsum(pot_eff) / ref, 0, 1.6)
+    acc = np.clip(np.cumsum(pot_eff) / ref, 0, 1.7)
 
     tg, co_a, co2_a, hcn_a, smoke_a, rad_a, o2_d = GAINS[esc]
     # El sensor de rack sufre inercia térmica: sin convección natural el calor no llega al techo/pared.

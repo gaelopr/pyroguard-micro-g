@@ -84,10 +84,19 @@ class TestSimulador(unittest.TestCase):
 
     def test_artemis_y_corte_de_ventilacion(self):
         df = ps.simular_escenario(2, AEA, 220)
-        self.assertAlmostEqual(df.co_ppm.max(), 33, delta=1.0)
+        self.assertAlmostEqual(df.co_ppm.max(), 53.7, delta=1.0)
         self.assertAlmostEqual(df.radiative_heat_flux_kwm2.max(), 3.60, delta=0.03)
         self.assertAlmostEqual(df.temp_c.max(), 25.3, delta=0.2)
         self.assertLess(df.airflow_cms.iloc[-1], 1.0)
+
+    def test_artemis_escala_los_gases_y_no_solo_la_temperatura(self):
+        # El factor de atmósfera se aplica sobre la concentración, no solo sobre el calor:
+        # si se normalizara con la propia atmósfera, AEA daría gases idénticos a ISS.
+        iss = ps.simular_escenario(2, ISS, 0)
+        aea = ps.simular_escenario(2, AEA, 0)
+        for col in ("co_ppm", "hcn_ppm", "smoke_obscuration_pct_m"):
+            self.assertGreater(aea[col].max(), iss[col].max() * 1.4, col)
+        self.assertGreater(aea.temp_c.max(), iss.temp_c.max())
 
     def test_corte_de_ventilacion_apaga_el_caudal(self):
         sin = ps.simular_escenario(2, ISS, 0)
