@@ -242,6 +242,20 @@ class TestLiveISS(unittest.TestCase):
         self.assertAlmostEqual(float(df.cabin_temp_c.iloc[0]), 23.4, delta=0.001)
 
 
+class TestVeredictoPorCursor(unittest.TestCase):
+    """El veredicto se calcula con lo ocurrido hasta t: al inicio no puede anunciar el pico."""
+
+    def test_el_protocolo_sobre_un_prefijo_no_ve_el_futuro(self):
+        full, d, _ = _escenario(2)
+        inicio = ae.generar_protocolo_respuesta(d.iloc[:5], ISS, 0)
+        final = ae.generar_protocolo_respuesta(d, ISS, 0)
+        self.assertEqual(inicio["nivel_amenaza"], "NOMINAL")
+        self.assertEqual(final["nivel_amenaza"], "CRÍTICO")
+        self.assertLess(inicio["co_ppm_pico"], final["co_ppm_pico"])
+        # El protocolo sobre el prefijo describe ese instante, no el pico del vuelo.
+        self.assertLess(inicio["radiative_peak_kwm2"], 1.0)
+
+
 class TestValidacion(unittest.TestCase):
     """El protocolo de docs/VALIDACION.md debe seguir dando lo que la documentación afirma."""
 

@@ -128,6 +128,10 @@ El `demo_saffire_sintetico.csv` es sintético y su nombre lo dice.
 | Llama fría | 50,1 % | 23,4 °C | 60 ppm | PRE-IGNICIÓN, humo 0,21 %/m |
 | Artemis + corte a 220 s | — | 25,3 °C | 54 ppm | CO 192 → 54 ppm, radiación 4,51 → 3,60 kW/m² |
 
+La tabla son los **picos** de cada escenario. En la app el veredicto de la cabecera se calcula con
+las muestras **hasta el cursor** —en t = 0 dice NOMINAL aunque el dataset acabe en CRÍTICO— y solo
+los indicadores rotulados «sesión» (ventaja IA, detector clásico, MIRI pico) resumen el dataset completo.
+
 ## Validación del detector
 
 Protocolo repetible en `validation.py` (30 repeticiones por caso, ruido de sensor distinto en

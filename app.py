@@ -852,38 +852,50 @@ df = ae.detectar_anomalias(raw)
 bench = ae.calcular_ventaja_deteccion(df)
 proto = ae.generar_protocolo_respuesta(df, atmosfera, corte)
 
-nivel = proto["nivel_amenaza"]
-cls = {"NOMINAL": "pg-nom", "PRE-IGNICIÓN": "pg-pre", "CRÍTICO": "pg-crit"}[nivel]
+nivel_sesion = proto["nivel_amenaza"]
 miri_max = float(df["miri_score"].max())
 ventaja_txt = (f"+{bench['ventaja_seg']} s" if bench["ventaja_seg"] is not None
                else ("CIEGO" if bench["tradicional_seg"] is None and bench["pyroguard_seg"] is not None else "—"))
 
 tone_ventaja = "pg-nom" if (bench["ventaja_seg"] or 0) > 0 else "pg-crit"
-ring = {"NOMINAL": GREEN, "PRE-IGNICIÓN": YELLOW, "CRÍTICO": RED}[nivel]
-pct = max(0.0, min(100.0, miri_max))
-_c = 2 * 3.141592653589793 * 52
-pulso = " pg-pulse" if nivel == "CRÍTICO" else ""
-first = proto["acciones_inmediatas"][0].split(":")[0].split(". ", 1)[-1]
 trad_txt = (f"{bench['tradicional_seg']} s" if bench["tradicional_seg"] is not None else "nunca")
-st.markdown(
-    f'<div class="pg-hero">'
-    f'<div class="pg-ring">'
-    f'<svg viewBox="0 0 120 120"><circle class="pg-ring-bg" cx="60" cy="60" r="52"/>'
-    f'<circle class="pg-ring-fg" cx="60" cy="60" r="52" stroke="{ring}" '
-    f'stroke-dasharray="{_c:.1f}" stroke-dashoffset="{_c * (1 - pct / 100):.1f}"/></svg>'
-    f'<span class="pg-ring-v" style="color:{ring}">{pct:.0f}<span style="font-size:13px">%</span></span>'
-    f'<span class="pg-ring-l">MIRI PICO</span></div>'
-    f'<div><div class="pg-hero-top">'
-    f'<span class="pg-pill {cls}{pulso}">{nivel}</span>'
-    f'<span class="pg-hero-sub">{proto["tipo_combustion"]}</span></div>'
-    f'<div class="pg-hero-kpis">'
-    f'<div><span>Ventaja IA</span><b class="{tone_ventaja}">{ventaja_txt}</b></div>'
-    f'<div><span>Detector clásico</span><b>{trad_txt}</b></div>'
-    f'<div><span>CO pico</span><b>{proto["co_ppm_pico"]:.0f}<span style="font-size:9px"> ppm</span></b></div>'
-    f'<div><span>Radiación</span><b>{proto["radiative_peak_kwm2"]:.2f}<span style="font-size:9px"> kW/m²</span></b></div>'
-    f'<div><span>HCN pico</span><b>{proto["hcn_ppm_pico"]:.1f}<span style="font-size:9px"> ppm</span></b></div>'
-    f'</div><div class="pg-hero-cta">Siguiente acción: <b>{first}</b> · pasos completos en '
-    f'<b>RESPUESTA</b></div></div></div>', unsafe_allow_html=True)
+_CIRC = 2 * 3.141592653589793 * 52
+_TONO_NIVEL = {"NOMINAL": "pg-nom", "PRE-IGNICIÓN": "pg-pre", "CRÍTICO": "pg-crit"}
+_COLOR_NIVEL = {"NOMINAL": GREEN, "PRE-IGNICIÓN": YELLOW, "CRÍTICO": RED}
+
+
+def _render_hero(proto_now: dict, nivel_now: str, miri_now: float, n_now: int, n_total: int) -> None:
+    """Veredicto del instante t: lo que se afirma sale de las muestras 0..t, no del pico futuro.
+
+    Los indicadores de sesión (ventaja, detector clásico, MIRI pico) se rotulan como tales
+    para que el hero no mezcle el estado actual con el resumen del dataset completo.
+    """
+    color = _COLOR_NIVEL[nivel_now]
+    pct = max(0.0, min(100.0, float(miri_now)))
+    pulso = " pg-pulse" if nivel_now == "CRÍTICO" else ""
+    first = proto_now["acciones_inmediatas"][0].split(":")[0].split(". ", 1)[-1]
+    st.markdown(
+        f'<div class="pg-hero">'
+        f'<div class="pg-ring">'
+        f'<svg viewBox="0 0 120 120"><circle class="pg-ring-bg" cx="60" cy="60" r="52"/>'
+        f'<circle class="pg-ring-fg" cx="60" cy="60" r="52" stroke="{color}" '
+        f'stroke-dasharray="{_CIRC:.1f}" stroke-dashoffset="{_CIRC * (1 - pct / 100):.1f}"/></svg>'
+        f'<span class="pg-ring-v" style="color:{color}">{pct:.0f}<span style="font-size:13px">%</span></span>'
+        f'<span class="pg-ring-l">MIRI AHORA</span></div>'
+        f'<div><div class="pg-hero-top">'
+        f'<span class="pg-pill {_TONO_NIVEL[nivel_now]}{pulso}">{nivel_now}</span>'
+        f'<span class="pg-hero-sub">{proto_now["tipo_combustion"]}</span></div>'
+        f'<div class="pg-hero-kpis">'
+        f'<div><span>Ventaja IA · sesión</span><b class="{tone_ventaja}">{ventaja_txt}</b></div>'
+        f'<div><span>Detector clásico</span><b>{trad_txt}</b></div>'
+        f'<div><span>CO pico hasta t</span><b>{proto_now["co_ppm_pico"]:.0f}<span style="font-size:9px"> ppm</span></b></div>'
+        f'<div><span>Radiación pico hasta t</span><b>{proto_now["radiative_peak_kwm2"]:.2f}<span style="font-size:9px"> kW/m²</span></b></div>'
+        f'<div><span>HCN pico hasta t</span><b>{proto_now["hcn_ppm_pico"]:.1f}<span style="font-size:9px"> ppm</span></b></div>'
+        f'<div><span>MIRI pico · sesión</span><b>{miri_max:.0f}<span style="font-size:9px"> %</span></b></div>'
+        f'</div><div class="pg-hero-cta">Siguiente acción: <b>{first}</b> · pasos completos en '
+        f'<b>RESPUESTA</b></div></div></div>', unsafe_allow_html=True)
+    st.caption(f"Veredicto calculado con las {n_now + 1} primeras muestras de {n_total + 1} (t = {n_now} s). "
+               "Las cifras «hasta t» son acumuladas hasta el cursor; «sesión» resume el dataset completo.")
 
 last = len(df) - 1
 t_last = float(df["timestamp_sec"].iloc[-1])  # eje X real: puede no ser 0..n con CSV irregulares
@@ -935,6 +947,16 @@ def _style(fig, t_now, h=360, rows=3):
 def live_panel():
     if st.session_state.get("play"):
         st.session_state.t_cursor = int((st.session_state.get("t_cursor", 0) + 8) % len(df))
+    if "t_cursor" not in st.session_state:
+        st.session_state.t_cursor = 0
+    n_now = int(st.session_state.t_cursor)
+    # El veredicto se calcula solo con lo ya ocurrido (muestras 0..t): si el incendio aún no
+    # ha empezado, el hero no puede anunciarlo por lo que pasará 300 s después.
+    proto_now = ae.generar_protocolo_respuesta(df.iloc[: n_now + 1], atmosfera, corte)
+    nivel_now = proto_now["nivel_amenaza"]
+    cls_now = _TONO_NIVEL[nivel_now]
+    _render_hero(proto_now, nivel_now, float(df["miri_score"].iloc[n_now]), n_now, last)
+
     t_now = st.slider("Cursor temporal (s)", 0, len(df) - 1, step=1, key="t_cursor")
 
     live = df.iloc[int(t_now)]
@@ -1045,29 +1067,31 @@ def live_panel():
     with tab3:
         h1, h2 = st.columns([1.1, 1])
         with h1:
-            st.markdown(f'<div class="pg-h3">Clasificación: <span class="{cls}">'
-                        f'{proto["tipo_combustion"]}</span></div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="pg-p">Nivel de amenaza: <span class="{cls}">{nivel}</span> · '
+            st.markdown(f'<div class="pg-h3">Clasificación: <span class="{cls_now}">'
+                        f'{proto_now["tipo_combustion"]}</span></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pg-p">Nivel de amenaza: <span class="{cls_now}">{nivel_now}</span> · '
                         f'Tiempo crítico: '
-                        f'{proto["tiempo_critico_seg"] if proto["tiempo_critico_seg"] is not None else "no proyectado"} s '
-                        f'(IDLH CO 1200 ppm / HCN 50 ppm)</div>', unsafe_allow_html=True)
+                        f'{proto_now["tiempo_critico_seg"] if proto_now["tiempo_critico_seg"] is not None else "no proyectado"} s '
+                        f'(IDLH CO 1200 ppm / HCN 50 ppm) · evaluado en t = {int(t_now)} s</div>',
+                        unsafe_allow_html=True)
             st.markdown("#### Acciones inmediatas (Flight Rules)")
-            for a in proto["acciones_inmediatas"]:
+            for a in proto_now["acciones_inmediatas"]:
                 st.markdown(f'<div class="pg-step">{a}</div>', unsafe_allow_html=True)
         with h2:
             st.markdown("#### Análisis químico")
-            st.info(proto["analisis_quimico"])
+            st.info(proto_now["analisis_quimico"])
             st.markdown("#### Explicación física")
-            st.success(proto["explicacion_fisica"])
-            st.markdown(f"**CO/CO2:** {proto['ratio_co_co2_pct']} % · **HCN pico:** {proto['hcn_ppm_pico']} ppm · "
-                        f"**ΔT:** {proto['temp_peak_c'] - proto['temp_baseline_c']:+.2f} °C · "
-                        f"**O2 mín:** {proto['o2_min_pct']} %")
+            st.success(proto_now["explicacion_fisica"])
+            st.markdown(f"**CO/CO2:** {proto_now['ratio_co_co2_pct']} % · "
+                        f"**HCN pico hasta t:** {proto_now['hcn_ppm_pico']} ppm · "
+                        f"**ΔT:** {proto_now['temp_peak_c'] - proto_now['temp_baseline_c']:+.2f} °C · "
+                        f"**O2 mín:** {proto_now['o2_min_pct']} %")
 
     with tab1:
         with st.expander("Datos y exportación"):
             st.dataframe(df, width="stretch", height=340)
             st.download_button("⬇️ Descargar telemetría + IA (CSV)", df.to_csv(index=False).encode("utf-8"),
-                               f"pyroguard_{nivel.lower()}.csv", "text/csv")
+                               f"pyroguard_{nivel_sesion.lower()}.csv", "text/csv")
             st.caption(f"{len(df)} muestras · {len(df.columns)} columnas · anomaly_score, "
                        "ia_alerta y miri_score incluidos.")
 
