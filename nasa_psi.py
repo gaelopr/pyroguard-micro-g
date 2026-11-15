@@ -16,6 +16,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import re
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -77,6 +78,9 @@ def parse_table(text: str) -> pd.DataFrame:
     if "material" in df.columns:
         pre = df["material"].astype(str).str.lower().str.contains("pre-test|pre test", regex=True)
         df = df[~pre]
+    # Y otras cuelan las notas al pie («Note 1 Derived from…») como si fueran muestras.
+    if "muestra" in df.columns:
+        df = df[~df["muestra"].str.lower().str.startswith("note")]
     return df.reset_index(drop=True)
 
 
@@ -117,6 +121,60 @@ def fetch(acc: str) -> dict:
         "descargado_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "tabla": parse_table(text),
     }
+
+
+MATERIAL_SIN_DECLARAR = "Sin material declarado"
+
+_ANOTACION = re.compile(r"\([^)]*\)|see fig[^,;]*", re.IGNORECASE)
+_NUMERO = re.compile(r"\d+(?:[.,]\d+)?")
+
+
+def _num(val) -> tuple[float | None, bool]:
+    """Extrae un único número del texto de PSI; (None, False) si no lo hay.
+
+    NASA escribe los valores a mano: «~ 0» (aproximado), «29 cm» (exacto),
+    «5 cm & 0 (note 2)» (dos cifras: no se reduce a una), «See Fig. 5» (gráfico).
+    Solo se devuelve cifra cuando hay **un** número; lo aproximado se marca aparte.
+    """
+    if val is None:
+        return None, False
+    if isinstance(val, float) and val != val:  # NaN
+        return None, False
+    text = str(val).strip()
+    if not text or text.lower() in ("nan", "n/a", "na", "-"):
+        return None, False
+    approx = text.startswith(("~", "<", ">")) or bool(_ANOTACION.search(text))
+    limpio = _ANOTACION.sub(" ", text)
+    nums = _NUMERO.findall(limpio)
+    if len(nums) != 1:
+        return None, False
+    return float(nums[0].replace(",", ".")), approx
+
+
+def comparativa(df: pd.DataFrame) -> pd.DataFrame | None:
+    """Tabla para graficar: longitud quemada en 0-g, material y %O2 por muestra.
+
+    No rellena huecos: las muestras cuyos valores NASA da como rango o como dos
+    cifras se quedan fuera de la columna correspondiente (NaN), y el gráfico de la
+    app lo dice. Devuelve None si la investigación no trae longitud quemada.
+    """
+    if "longitud_quemada_0g" not in df.columns or "muestra" not in df.columns:
+        return None
+    filas = []
+    for _, fila in df.iterrows():
+        quemado, aprox_q = _num(fila.get("longitud_quemada_0g"))
+        o2, aprox_o2 = _num(fila.get("o2_pct"))
+        if quemado is None and o2 is None:
+            continue
+        material = str(fila.get("material", "")).strip()
+        if not material or material.lower() == "nan":
+            material = MATERIAL_SIN_DECLARAR
+        segundos, _ = _num(fila.get("tiempo_combustion_s"))
+        filas.append({"muestra": str(fila["muestra"]), "material": material,
+                      "quemado_cm": quemado, "o2_pct": o2,
+                      "aprox_quemado": aprox_q, "aprox_o2": aprox_o2,
+                      "combustion_s": segundos})
+    return pd.DataFrame(filas) if filas else None
 
 
 def resumen(df: pd.DataFrame) -> dict:

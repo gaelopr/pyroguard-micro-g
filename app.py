@@ -641,6 +641,77 @@ def _psi_fetch(acc: str) -> dict:
     return nasa_psi.fetch(acc)
 
 
+def _psi_chart(df: pd.DataFrame) -> bool:
+    """Comparativa real: longitud quemada por material y frente al %O2.
+
+    Devuelve False si la investigación no publica longitud quemada en 0-g.
+    """
+    cmp = nasa_psi.comparativa(df)
+    if cmp is None or cmp.empty:
+        return False
+
+    mats = list(dict.fromkeys(cmp["material"]))
+    paleta = [CYAN, ORANGE, VIOLET, GREEN, YELLOW, RED]
+    color = {m: (T["dim"] if m == nasa_psi.MATERIAL_SIN_DECLARAR
+                 else paleta[i % len(paleta)]) for i, m in enumerate(mats)}
+
+    orden = list(cmp["muestra"])
+    barras = cmp.dropna(subset=["quemado_cm"])
+    maximo = float(barras["quemado_cm"].max()) if not barras.empty else 1.0
+
+
+    fig = go.Figure()
+    for m in mats:
+        s = barras[barras["material"] == m]
+        if s.empty:
+            continue
+        fig.add_trace(go.Bar(y=s["muestra"], x=s["quemado_cm"], orientation="h", name=m,
+                             marker=dict(color=color[m]),
+                             hovertemplate="%{y} · %{x:.0f} cm quemados en 0-g<extra>"
+                                           + m + "</extra>"))
+
+    # La otra variable del experimento: %O2 de la cámara y tiempo de combustión.
+    contexto = []
+    for r in cmp.itertuples():
+        largo = ("—" if pd.isna(r.quemado_cm)
+                 else ("~" if r.aprox_quemado else "") + f"{r.quemado_cm:.0f} cm")
+        o2 = "O2 n/d" if pd.isna(r.o2_pct) else f"{r.o2_pct:.1f} %"
+        seg = "" if pd.isna(r.combustion_s) else f" · {r.combustion_s:.0f} s"
+        contexto.append(f"{largo} · {o2}" + seg)
+    for muestra, texto in zip(orden, contexto):
+        fig.add_annotation(x=0.62, y=muestra, xref="paper", yref="y", xanchor="left",
+                           text=texto, showarrow=False,
+                           font=dict(size=9.5, color=T["dim"], family="Consolas, monospace"))
+
+    alto = min(560, max(320, 96 + 38 * len(cmp)))
+    fig.update_layout(**PLOT, height=alto, margin=dict(l=58, r=16, t=72, b=54), bargap=0.34,
+                      showlegend=True, hovermode="closest",
+                      legend=dict(orientation="h", yanchor="bottom", y=1.04, x=0,
+                                  font=dict(size=9, color=T["ink"])),
+                      font=dict(family="Consolas, monospace", size=10, color=T["ink"]))
+    fig.add_annotation(x=0.62, y=1.0, xref="paper", yref="paper", xanchor="left", yanchor="bottom",
+                       text="QUEMADO · %O2 · COMBUSTIÓN", showarrow=False,
+                       font=dict(size=9, color=T["dim"]))
+    fig.update_xaxes(gridcolor=T["hair"], tickfont=dict(color=T["ink"]),
+                     title_text="cm quemados en 0-g", title_font=dict(color=T["dim"], size=10),
+                     range=[0, maximo * 1.95])
+    fig.update_yaxes(gridcolor=T["hair"], tickfont=dict(color=T["ink"]),
+                     categoryorder="array", categoryarray=orden)
+    st.plotly_chart(fig, config=PCFG, width="stretch")
+
+    fuera = cmp[cmp["quemado_cm"].isna() | cmp["o2_pct"].isna()]
+    notas = [f"**{len(barras)} de {len(cmp)} muestras** con longitud quemada publicada"]
+    if not fuera.empty:
+        notas.append("quedan fuera " + ", ".join(
+            f"{r.muestra} ({'longitud dada como dos cifras' if pd.isna(r.quemado_cm) else '%O2 en rango'})"
+            for r in fuera.itertuples()))
+    st.caption(" · ".join(notas) + ". La cifra con `~` es la que NASA da como aproximada; "
+               "a la derecha, el %O2 de la cámara y el tiempo de combustión de cada muestra. "
+               "El %O2 apenas se mueve (21,5–22,1 %): lo que separa una muestra que arde de una "
+               "que se apaga es el material. Ningún hueco se rellena.")
+    return True
+
+
 def render_psi_mode() -> None:
     st.markdown("#### Histórico NASA · PSI (Saffire)")
     st.caption("Tablas experimentales reales de las quemas en microgravedad de la NASA, "
@@ -695,7 +766,14 @@ def render_psi_mode() -> None:
         f'<a href="{html.escape(res["url"])}" target="_blank">psi.nasa.gov</a>'
         '</div></div>', unsafe_allow_html=True)
 
-    _tbl(df)
+    st.markdown("##### Comparativa del vuelo")
+    if not _psi_chart(df):
+        st.caption(f"{acc} no publica longitud quemada en 0-g en su tabla experimental: "
+                   "la comparativa aparece con Saffire-II, que sí la mide por muestra.")
+
+    st.markdown("##### Tabla experimental completa")
+    _tbl(df.fillna("—"))
+
     st.caption("Las series temporales crudas de Saffire —imágenes y telemetría de los sensores— "
                "pesan entre 11 y 33 GB por experimento y no se descargan aquí: esta es la matriz "
                "experimental del vuelo.")

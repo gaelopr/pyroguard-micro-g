@@ -254,6 +254,29 @@ class TestNasaPSI(unittest.TestCase):
             self.assertIn(col, df.columns)
         self.assertEqual(df["material"].iloc[0], "Silicone")
 
+    CSV_LARGO = (
+        "Sample Number,Material,Air Flow (cm/s),Percent O2 (Note 1),Burn Time (s),?-g Burn Length\n"
+        "2-1,Silicone,20 cm/s,~ 21.5,Insignificant,~ 0\n"
+        "2-5,Cotton-Fiberglass (SIBAL),20 cm/s,~ 22.1,145 s,29 cm\n"
+        "2-6,,20 cm/s,~ 22.1,115 s,29 cm\n"
+        "2-7,PMMA & Nomex,20 cm/s,~ 22.1,140 s,5 cm & 0 (note 2)\n"
+        "2-8,PMMA,20 cm/s,22.1 to 22.0,600 s,~ 10 cm (note 3)\n"
+        "Note 1 Derived from measured CO2 production,,,,,\n"
+    )
+
+    def test_comparativa_respeta_lo_aproximado(self):
+        c = nasa_psi.comparativa(nasa_psi.parse_table(self.CSV_LARGO))
+        filas = {r.muestra: r for r in c.itertuples()}
+        self.assertEqual(len(c), 5)  # la fila «Note 1» no es una muestra
+        self.assertEqual(filas["2-1"].quemado_cm, 0.0)
+        self.assertTrue(filas["2-1"].aprox_quemado)
+        self.assertEqual(filas["2-5"].quemado_cm, 29.0)
+        self.assertFalse(filas["2-5"].aprox_quemado)
+        self.assertEqual(filas["2-6"].material, nasa_psi.MATERIAL_SIN_DECLARAR)
+        self.assertTrue(pd.isna(filas["2-7"].quemado_cm))  # «5 cm & 0»: dos cifras
+        self.assertEqual(filas["2-8"].quemado_cm, 10.0)
+        self.assertTrue(pd.isna(filas["2-8"].o2_pct))  # «22.1 to 22.0»: rango
+
     def test_resumen_no_inventa(self):
         sm = nasa_psi.resumen(nasa_psi.parse_table(self.CSV))
         self.assertEqual(sm["muestras"], 2)

@@ -108,6 +108,14 @@ Las series temporales crudas de Saffire (imágenes y telemetría de los sensores
 entre 11 y 33 GB por experimento y quedan fuera del alcance de la app; lo que se descarga
 es la matriz experimental del vuelo.
 
+El modo «Histórico NASA» dibuja además la **comparativa del vuelo** con las cifras tal
+como las publica NASA: cm quemados en 0-g por muestra (color = material) y, a la derecha,
+%O2 de la cámara y tiempo de combustión. En Saffire-II son 4 muestras de silicona que se
+apagan solas (~0 cm) frente a la tela SIBAL, que se consume entera (29 cm, 145 s y 115 s)
+con el mismo %O2: lo que decide es el material. Los valores que NASA da como rango
+(«22.1 to 22.0») o como dos cifras («5 cm & 0 (note 2)») no se convierten en un número:
+se excluyen y se declaran bajo el gráfico.
+
 El `demo_saffire_sintetico.csv` es sintético y su nombre lo dice.
 
 ## Cifras de referencia (reproducibles)
